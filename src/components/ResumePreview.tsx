@@ -455,8 +455,14 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, userTy
                   // Handle object format with title and issuer
                   if ('title' in cert && 'issuer' in cert) {
                     certText = `${cert.title} - ${cert.issuer}`;
+                  } else if ('title' in cert && 'description' in cert) {
+                    certText = `${cert.title} - ${cert.description}`;
                   } else if ('name' in cert) {
                     certText = cert.name;
+                  } else if ('title' in cert) {
+                    certText = cert.title;
+                  } else if ('description' in cert) {
+                    certText = cert.description;
                   } else {
                     certText = JSON.stringify(cert);
                   }

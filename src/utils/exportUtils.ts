@@ -926,13 +926,19 @@ const generateWordHTMLContent = (data: ResumeData): string => {
             if (typeof cert === 'string') {
               certText = cert;
             } else if (cert && typeof cert === 'object') {
-              // Handle object format with title and issuer
-              if ('title' in cert && 'issuer' in cert) {
+              // Handle various object formats
+              if ('title' in cert && 'description' in cert) {
+                certText = `${cert.title} - ${cert.description}`;
+              } else if ('title' in cert && 'issuer' in cert) {
                 certText = `${cert.title} - ${cert.issuer}`;
               } else if ('name' in cert) {
                 certText = cert.name;
+              } else if ('title' in cert) {
+                certText = cert.title;
+              } else if ('description' in cert) {
+                certText = cert.description;
               } else {
-                certText = JSON.stringify(cert);
+                certText = Object.values(cert).filter(Boolean).join(' - ');
               }
             } else {
               certText = String(cert);

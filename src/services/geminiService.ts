@@ -239,19 +239,24 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
       if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
         parsedResult.certifications = parsedResult.certifications.map((cert: any) => {
           if (typeof cert === 'object' && cert !== null) {
-            // If it's an object with title and description, format it as a string
+            // Handle various object formats
             if (cert.title && cert.description) {
               return `${cert.title} - ${cert.description}`;
+            } else if (cert.title && cert.issuer) {
+              return `${cert.title} - ${cert.issuer}`;
             } else if (cert.title) {
               return cert.title;
+            } else if (cert.name) {
+              return cert.name;
             } else if (cert.description) {
               return cert.description;
+            } else {
+              // Convert any other object structure to string
+              return Object.values(cert).filter(Boolean).join(' - ');
             }
-            // If it's an object but doesn't have expected keys, stringify it
-            return JSON.stringify(cert);
           }
           // If it's already a string, return as is
-          return cert;
+          return String(cert);
         });
       }
 
