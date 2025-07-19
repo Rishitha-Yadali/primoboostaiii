@@ -235,6 +235,26 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         }));
       }
 
+      // Ensure certifications are strings, not objects
+      if (parsedResult.certifications && Array.isArray(parsedResult.certifications)) {
+        parsedResult.certifications = parsedResult.certifications.map((cert: any) => {
+          if (typeof cert === 'object' && cert !== null) {
+            // If it's an object with title and description, format it as a string
+            if (cert.title && cert.description) {
+              return `${cert.title} - ${cert.description}`;
+            } else if (cert.title) {
+              return cert.title;
+            } else if (cert.description) {
+              return cert.description;
+            }
+            // If it's an object but doesn't have expected keys, stringify it
+            return JSON.stringify(cert);
+          }
+          // If it's already a string, return as is
+          return cert;
+        });
+      }
+
       // CRITICAL: Only use provided social links - empty string if not provided
       parsedResult.linkedin = linkedinUrl || "";
       parsedResult.github = githubUrl || "";
