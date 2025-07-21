@@ -249,20 +249,31 @@ const ResumeOptimizer: React.FC = () => {
   
   const proceedWithOptimization = async (resumeData: ResumeData, initialScore: DetailedScore) => {
     try {
-      // Analyze projects and apply replacements if needed
-      let finalResumeData = resumeData;
+      // Final AI optimization pass - re-optimize the entire resume with all new content
+      console.log('Starting final AI optimization pass...');
+      const finalOptimizedResume = await optimizeResume(
+        JSON.stringify(resumeData), 
+        jobDescription, 
+        userType, 
+        linkedinUrl, 
+        githubUrl, 
+        targetRole
+      );
       
-      if (resumeData.projects && resumeData.projects.length > 0) {
+      // Analyze projects and apply replacements if needed
+      let finalResumeData = finalOptimizedResume;
+      
+      if (finalOptimizedResume.projects && finalOptimizedResume.projects.length > 0) {
         try {
           // Use advanced project analyzer to score and replace projects
           const projectAnalysis = await advancedProjectAnalyzer.analyzeAndReplaceProjects(
-            resumeData,
+            finalOptimizedResume,
             targetRole || 'Software Engineer',
             jobDescription
           );
           
           // Step 1: Keep only projects scoring 80+ (suitable projects)
-          const suitableProjects = resumeData.projects?.filter(project => {
+          const suitableProjects = finalOptimizedResume.projects?.filter(project => {
             // Check if this project was marked as suitable (score 80+)
             const analysis = projectAnalysis.projectsToReplace.find(p => p.title === project.title);
             return !analysis || analysis.score >= 80; // Keep if not in replace list or score is 80+
@@ -289,11 +300,11 @@ const ResumeOptimizer: React.FC = () => {
           
           // Step 5: Create final resume with replaced projects
           finalResumeData = {
-            ...resumeData,
+            ...finalOptimizedResume,
             projects: finalProjects
           };
           
-          console.log(`Project replacement: ${resumeData.projects.length} original → ${suitableProjects.length} kept + ${finalProjects.length - suitableProjects.length} new = ${finalProjects.length} total`);
+          console.log(`Project replacement: ${finalOptimizedResume.projects.length} original → ${suitableProjects.length} kept + ${finalProjects.length - suitableProjects.length} new = ${finalProjects.length} total`);
         } catch (projectError) {
           console.warn('Project analysis failed, using original projects:', projectError);
           // Continue with original resume if project analysis fails
