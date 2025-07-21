@@ -1,7 +1,7 @@
 import { ResumeData } from '../types/resume';
 import { ProjectAnalysis, ProjectMatch, RecommendedProject, ProjectSuitabilityResult } from '../types/analysis';
 
-const GEMINI_API_KEY = 'AIzaSyCeUpUKMIubrF3cxtHgP793dd4RcIrJplg';
+const GEMINI_API_KEY = 'AIzaSyDZWV51wiJ976BaWu8P7yE1MxWiE4oIMvQ';
 const GITHUB_TOKEN = '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';
 const SERP_API_KEY = '5a51f510fa66113157ff2d54c84891760bfcdb06f596789550f6cfb13a974b87';
 
