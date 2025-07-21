@@ -58,6 +58,7 @@ const ResumeOptimizer: React.FC = () => {
   const [showMissingSectionsModal, setShowMissingSectionsModal] = useState(false);
   const [missingSections, setMissingSections] = useState<string[]>([]);
   const [pendingResumeData, setPendingResumeData] = useState<ResumeData | null>(null);
+  const [isCalculatingScore, setIsCalculatingScore] = useState(false);
 
   // Check subscription status on component mount
   useEffect(() => {
@@ -159,6 +160,17 @@ const ResumeOptimizer: React.FC = () => {
     } finally {
       setIsOptimizing(false);
     }
+  };
+
+  const continueOptimizationProcess = async (resumeData: ResumeData) => {
+    try {
+      // Continue with initial resume processing
+      await handleInitialResumeProcessing(resumeData);
+    } catch (error) {
+      console.error('Error in optimization process:', error);
+      alert('Failed to continue optimization. Please try again.');
+    }
+  };
 
   // Handle initial resume processing after AI response or missing sections input
   const handleInitialResumeProcessing = async (resumeData: ResumeData) => {
@@ -178,7 +190,7 @@ const ResumeOptimizer: React.FC = () => {
         setShowProjectAnalysis(true);
       } else {
         // No projects to analyze, proceed with final optimization
-        await proceedWithFinalOptimization(resumeData);
+        await proceedWithFinalOptimization(resumeData, initialScore);
       }
     } catch (error) {
       console.error('Error in initial resume processing:', error);
@@ -187,12 +199,6 @@ const ResumeOptimizer: React.FC = () => {
       setIsCalculatingScore(false);
     }
   };
-
-  // New function to handle initial resume processing after AI response or missing sections input
-  const handleInitialResumeProcessing = async (resumeData: ResumeData) => {
-    try {
-      // Get initial detailed score
-      const initialScore = await getDetailedResumeScore(resumeData, jobDescription);
   
   const checkForMissingSections = (resumeData: ResumeData): string[] => {
     const missing: string[] = [];
