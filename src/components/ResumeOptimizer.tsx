@@ -1057,41 +1057,43 @@ const ResumeOptimizer: React.FC = () => {
         </div>
       )}
       {/* Modals */}
-      <ProjectEnhancement
-        isOpen={showProjectEnhancement}
-        onClose={() => setShowProjectEnhancement(false)}
-        currentResume={parsedResumeData || optimizedResume || { name: '', phone: '', email: '', linkedin: '', github: '', education: [], workExperience: [], projects: [], skills: [], certifications: [] }}
-        jobDescription={jobDescription}
-        onProjectsAdded={handleProjectsUpdated}
-      />
+      <>
+        <ProjectEnhancement
+          isOpen={showProjectEnhancement}
+          onClose={() => setShowProjectEnhancement(false)}
+          currentResume={parsedResumeData || optimizedResume || { name: '', phone: '', email: '', linkedin: '', github: '', education: [], workExperience: [], projects: [], skills: [], certifications: [] }}
+          jobDescription={jobDescription}
+          onProjectsAdded={handleProjectsUpdated}
+        />
 
-      <ProjectAnalysisModal
-        isOpen={showProjectAnalysis}
-        onClose={() => setShowProjectAnalysis(false)}
-        resumeData={parsedResumeData || optimizedResume || { name: '', phone: '', email: '', linkedin: '', github: '', education: [], workExperience: [], projects: [], skills: [], certifications: [] }}
-        jobDescription={jobDescription}
-        targetRole={targetRole}
-        onProjectsUpdated={handleProjectsUpdated}
-      />
+        <ProjectAnalysisModal
+          isOpen={showProjectAnalysis}
+          onClose={() => setShowProjectAnalysis(false)}
+          resumeData={parsedResumeData || optimizedResume || { name: '', phone: '', email: '', linkedin: '', github: '', education: [], workExperience: [], projects: [], skills: [], certifications: [] }}
+          jobDescription={jobDescription}
+          targetRole={targetRole}
+          onProjectsUpdated={handleProjectsUpdated}
+        />
 
-      <SubscriptionPlans
-        isOpen={showSubscriptionPlans}
-        onClose={() => setShowSubscriptionPlans(false)}
-        onSubscriptionSuccess={handleSubscriptionSuccess}
-      />
+        <SubscriptionPlans
+          isOpen={showSubscriptionPlans}
+          onClose={() => setShowSubscriptionPlans(false)}
+          onSubscriptionSuccess={handleSubscriptionSuccess}
+        />
 
-      {/* Missing Sections Modal */}
-      <MissingSectionsModal
-        isOpen={showMissingSectionsModal}
-        onClose={() => {
-          setShowMissingSectionsModal(false);
-          setMissingSections([]);
-          setPendingResumeData(null);
-          setIsOptimizing(false);
-        }}
-        missingSections={missingSections}
-        onSectionsProvided={handleMissingSectionsProvided}
-      />
+        {/* Missing Sections Modal */}
+        <MissingSectionsModal
+          isOpen={showMissingSectionsModal}
+          onClose={() => {
+            setShowMissingSectionsModal(false);
+            setMissingSections([]);
+            setPendingResumeData(null);
+            setIsOptimizing(false);
+          }}
+          missingSections={missingSections}
+          onSectionsProvided={handleMissingSectionsProvided}
+        />
+      </>
     </div>
   );
 };
