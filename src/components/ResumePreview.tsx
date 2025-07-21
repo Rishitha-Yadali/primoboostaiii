@@ -454,13 +454,13 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, userTy
                 } else if (cert && typeof cert === 'object') {
                   // Handle object format with title and issuer
                   if ('title' in cert && 'issuer' in cert) {
-                    certText = `${cert.title} - ${cert.issuer}`;
+                    certText = `${String(cert.title)} - ${String(cert.issuer)}`;
                   } else if ('title' in cert && 'description' in cert) {
-                    certText = `${cert.title} - ${cert.description}`;
+                    certText = `${String(cert.title)} - ${String(cert.description)}`;
                   } else if ('name' in cert) {
-                    certText = cert.name;
+                    certText = String(cert.name);
                   } else if ('title' in cert) {
-                    certText = cert.title;
+                    certText = String(cert.title);
                   } else if ('description' in cert) {
                     certText = cert.description;
                   } else {
