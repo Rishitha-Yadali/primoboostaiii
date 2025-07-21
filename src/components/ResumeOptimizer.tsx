@@ -159,6 +159,50 @@ const ResumeOptimizer: React.FC = () => {
     } finally {
       setIsOptimizing(false);
     }
+  // New function to handle initial resume processing after AI response or missing sections input
+  const handleInitialResumeProcessing = async (resumeData: ResumeData) => {
+    try {
+      // Get initial detailed score
+      const initialScore = await getDetailedResumeScore(resumeData, jobDescription);
+      setInitialResumeScore(initialScore);
+
+      // Set resume data for project analysis
+      setParsedResumeData(resumeData);
+      setOptimizedResume(resumeData);
+
+      // Check if projects need analysis and enhancement
+      if (resumeData.projects && resumeData.projects.length > 0) {
+        try {
+          const projectAnalysis = await advancedProjectAnalyzer.analyzeAndReplaceProjects(
+            resumeData,
+            targetRole || 'Software Engineer',
+            jobDescription
+          );
+          
+          // Check if any projects need replacement (score below 80)
+          const hasLowScoringProjects = projectAnalysis.projectsToReplace.some(p => p.score < 80);
+          
+          if (hasLowScoringProjects) {
+            // Show project analysis modal for user to review and replace projects
+            setIsOptimizing(false);
+            setShowProjectAnalysis(true);
+            return;
+          }
+        } catch (projectError) {
+          console.warn('Project analysis failed, continuing with original projects:', projectError);
+        }
+      }
+      
+      // If no project issues or no projects, proceed with final optimization
+      await proceedWithFinalOptimization(resumeData, initialScore);
+      
+    } catch (error) {
+      console.error('Error in initial resume processing:', error);
+      alert('Failed to process resume. Please try again.');
+      setIsOptimizing(false);
+    }
+  };
+
   };
   
   const checkForMissingSections = (resumeData: ResumeData): string[] => {
@@ -193,57 +237,28 @@ const ResumeOptimizer: React.FC = () => {
       ...(data.certifications && { certifications: data.certifications })
     };
     
-    setParsedResumeData(updatedResume);
     setShowMissingSectionsModal(false);
     setMissingSections([]);
     setPendingResumeData(null);
     
-    // Continue with optimization process
-    continueOptimizationProcess(updatedResume);
+    // Continue with initial resume processing
+    handleInitialResumeProcessing(updatedResume);
   };
   
-  const continueOptimizationProcess = async (resumeData: ResumeData) => {
+  // Renamed to be more specific about its purpose
+  const proceedWithFinalOptimization = async (resumeData: ResumeData, initialScore: DetailedScore) => {
     try {
       setIsOptimizing(true);
       
-      // Get initial detailed score
-      const initialScore = await getDetailedResumeScore(resumeData, jobDescription);
-      setInitialResumeScore(initialScore);
-
-      // Set optimized resume early to prevent returning to homepage
-      setOptimizedResume(resumeData);
-
-      // Use advanced project analyzer to check project alignment
-      if (resumeData.projects && resumeData.projects.length > 0) {
-        try {
-          const projectAnalysis = await advancedProjectAnalyzer.analyzeAndReplaceProjects(
-            resumeData,
-            targetRole || 'Software Engineer',
-            jobDescription
-          );
-          
-          // Check if any projects need replacement (score below 80)
-          const hasLowScoringProjects = projectAnalysis.projectsToReplace.some(p => p.score < 80);
-          
-          if (hasLowScoringProjects) {
-            // Show project analysis modal for user to review and replace projects
-            setIsOptimizing(false);
-            setShowProjectAnalysis(true);
-            return;
-          }
-        } catch (projectError) {
-          console.warn('Project analysis failed, continuing with original projects:', projectError);
-        }
-      }
-      
-      // If all projects are well-aligned or no projects, proceed with normal optimization
+      // Proceed with final AI optimization
       await proceedWithOptimization(resumeData, initialScore);
       
     } catch (error) {
-      console.error('Error optimizing resume:', error);
-      alert('Failed to optimize resume. Please try again.');
+      console.error('Error in final optimization:', error);
+      alert('Failed to complete final optimization. Please try again.');
+      setIsOptimizing(false);
     } finally {
-      setIsOptimizing(false); // Set to false when optimization is complete or fails
+      setIsOptimizing(false);
     }
   };
   
@@ -458,17 +473,18 @@ const ResumeOptimizer: React.FC = () => {
   // Handle projects added from ProjectEnhancement component
   const handleProjectsAdded = (updatedResumeData: ResumeData) => {
     console.log('handleProjectsAdded called with:', updatedResumeData);
-    console.log('Current parsedResumeData:', parsedResumeData);
-    console.log('Current optimizedResume:', optimizedResume);
-    
-    console.log('Updated resume received:', updatedResumeData);
     
     // Update both optimized resume and parsed resume data
     setOptimizedResume(updatedResumeData);
     setParsedResumeData(updatedResumeData);
     
-    // Generate scores after adding projects
-    generateScoresAfterProjectAdd(updatedResumeData);
+    // Trigger final AI re-optimization with the updated resume
+    if (initialResumeScore) {
+      proceedWithFinalOptimization(updatedResumeData, initialResumeScore);
+    } else {
+      // Fallback: generate scores without final AI optimization
+      generateScoresAfterProjectAdd(updatedResumeData);
+    }
   };
   
   const generateScoresAfterProjectAdd = async (updatedResume: ResumeData) => {
@@ -505,11 +521,19 @@ const ResumeOptimizer: React.FC = () => {
   };
 
   const handleProjectsUpdated = (updatedResume: ResumeData) => {
+    console.log('Projects updated, triggering final AI re-optimization...');
+    
+    // Update resume data
     setOptimizedResume(updatedResume);
     setParsedResumeData(updatedResume);
     
-    // Generate scores after adding projects
-    generateScoresAfterProjectAdd(updatedResume);
+    // Trigger final AI re-optimization with the updated resume
+    if (initialResumeScore) {
+      proceedWithFinalOptimization(updatedResume, initialResumeScore);
+    } else {
+      // Fallback: generate scores without final AI optimization
+      generateScoresAfterProjectAdd(updatedResume);
+    }
   };
 
   // Mobile interface sections
