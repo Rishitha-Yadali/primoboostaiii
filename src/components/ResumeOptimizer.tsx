@@ -159,6 +159,35 @@ const ResumeOptimizer: React.FC = () => {
     } finally {
       setIsOptimizing(false);
     }
+
+  // Handle initial resume processing after AI response or missing sections input
+  const handleInitialResumeProcessing = async (resumeData: ResumeData) => {
+    try {
+      // Calculate initial resume score
+      setIsCalculatingScore(true);
+      const initialScore = await getDetailedResumeScore(resumeData, jobDescription);
+      setInitialResumeScore(initialScore);
+      
+      // Set the resume data
+      setOptimizedResume(resumeData);
+      setParsedResumeData(resumeData);
+      
+      // Check if projects need analysis/enhancement
+      if (resumeData.projects && resumeData.projects.length > 0) {
+        // Proceed to project analysis
+        setShowProjectAnalysis(true);
+      } else {
+        // No projects to analyze, proceed with final optimization
+        await proceedWithFinalOptimization(resumeData);
+      }
+    } catch (error) {
+      console.error('Error in initial resume processing:', error);
+      alert('Failed to process resume. Please try again.');
+    } finally {
+      setIsCalculatingScore(false);
+    }
+  };
+
   // New function to handle initial resume processing after AI response or missing sections input
   const handleInitialResumeProcessing = async (resumeData: ResumeData) => {
     try {
