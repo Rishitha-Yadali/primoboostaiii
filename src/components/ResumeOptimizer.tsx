@@ -1076,6 +1076,19 @@ const ResumeOptimizer: React.FC = () => {
         onClose={() => setShowSubscriptionPlans(false)}
         onSubscriptionSuccess={handleSubscriptionSuccess}
       />
+
+      {/* Missing Sections Modal */}
+      <MissingSectionsModal
+        isOpen={showMissingSectionsModal}
+        onClose={() => {
+          setShowMissingSectionsModal(false);
+          setMissingSections([]);
+          setPendingResumeData(null);
+          setIsOptimizing(false);
+        }}
+        missingSections={missingSections}
+        onSectionsProvided={handleMissingSectionsProvided}
+      />
     </div>
   );
 };
