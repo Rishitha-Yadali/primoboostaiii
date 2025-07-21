@@ -3,7 +3,7 @@ import { ResumeData } from '../types/resume';
 
 const SERP_API_KEY = '5a51f510fa66113157ff2d54c84891760bfcdb06f596789550f6cfb13a974b87';
 const GEMINI_API_KEY = 'AIzaSyCeUpUKMIubrF3cxtHgP793dd4RcIrJplg'; // <-- Replace with your Gemini API key
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'; // Gemini chat endpoint
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'; // Gemini chat endpoint
 
 class ProjectEnhancementService {
   // Search for relevant projects using SerpAPI
