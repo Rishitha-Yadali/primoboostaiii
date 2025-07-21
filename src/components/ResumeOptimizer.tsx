@@ -193,46 +193,6 @@ const ResumeOptimizer: React.FC = () => {
     try {
       // Get initial detailed score
       const initialScore = await getDetailedResumeScore(resumeData, jobDescription);
-      setInitialResumeScore(initialScore);
-
-      // Set resume data for project analysis
-      setParsedResumeData(resumeData);
-      setOptimizedResume(resumeData);
-
-      // Check if projects need analysis and enhancement
-      if (resumeData.projects && resumeData.projects.length > 0) {
-        try {
-          const projectAnalysis = await advancedProjectAnalyzer.analyzeAndReplaceProjects(
-            resumeData,
-            targetRole || 'Software Engineer',
-            jobDescription
-          );
-          
-          // Check if any projects need replacement (score below 80)
-          const hasLowScoringProjects = projectAnalysis.projectsToReplace.some(p => p.score < 80);
-          
-          if (hasLowScoringProjects) {
-            // Show project analysis modal for user to review and replace projects
-            setIsOptimizing(false);
-            setShowProjectAnalysis(true);
-            return;
-          }
-        } catch (projectError) {
-          console.warn('Project analysis failed, continuing with original projects:', projectError);
-        }
-      }
-      
-      // If no project issues or no projects, proceed with final optimization
-      await proceedWithFinalOptimization(resumeData, initialScore);
-      
-    } catch (error) {
-      console.error('Error in initial resume processing:', error);
-      alert('Failed to process resume. Please try again.');
-      setIsOptimizing(false);
-    }
-  };
-
-  };
   
   const checkForMissingSections = (resumeData: ResumeData): string[] => {
     const missing: string[] = [];
