@@ -210,6 +210,9 @@ const ResumeOptimizer: React.FC = () => {
       const initialScore = await getDetailedResumeScore(resumeData, jobDescription);
       setInitialResumeScore(initialScore);
 
+      // Set optimized resume early to prevent returning to homepage
+      setOptimizedResume(resumeData);
+
       // Use advanced project analyzer to check project alignment
       if (resumeData.projects && resumeData.projects.length > 0) {
         try {
@@ -224,8 +227,8 @@ const ResumeOptimizer: React.FC = () => {
           
           if (hasLowScoringProjects) {
             // Show project analysis modal for user to review and replace projects
-            setShowProjectAnalysis(true);
             setIsOptimizing(false);
+            setShowProjectAnalysis(true);
             return;
           }
         } catch (projectError) {
