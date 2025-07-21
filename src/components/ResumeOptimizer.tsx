@@ -10,6 +10,7 @@ import { MobileOptimizedInterface } from './MobileOptimizedInterface';
 import { ProjectEnhancement } from './ProjectEnhancement';
 import { SubscriptionPlans } from './payment/SubscriptionPlans';
 import { SubscriptionStatus } from './payment/SubscriptionStatus';
+import { MissingSectionsModal } from './MissingSectionsModal';
 import { parseFile } from '../utils/fileParser';
 import { optimizeResume } from '../services/geminiService';
 import { getMatchScore, generateBeforeScore, generateAfterScore, getDetailedResumeScore, reconstructResumeText } from '../services/scoringService';
@@ -54,6 +55,9 @@ const ResumeOptimizer: React.FC = () => {
   const [subscription, setSubscription] = useState<any>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showMissingSectionsModal, setShowMissingSectionsModal] = useState(false);
+  const [missingSections, setMissingSections] = useState<string[]>([]);
+  const [pendingResumeData, setPendingResumeData] = useState<ResumeData | null>(null);
 
   // Check subscription status on component mount
   useEffect(() => {
@@ -136,28 +140,101 @@ const ResumeOptimizer: React.FC = () => {
       const parsedResume = await optimizeResume(resumeText, jobDescription, userType, linkedinUrl, githubUrl, targetRole);
       setParsedResumeData(parsedResume);
       
-      // Get initial detailed score
-      const initialScore = await getDetailedResumeScore(parsedResume, jobDescription);
-      setInitialResumeScore(initialScore);
-
-      // Find low scoring projects (below 75% relevance)
-      const lowScoring = parsedResume.projects?.filter((project, index) => {
-        // Simulate project scoring - in a real implementation, this would use AI to score each project
-        const projectScore = Math.random() * 100; // Random score for demonstration
-        return projectScore < 75;
-      }) || [];
-      
-      setLowScoringProjects(lowScoring);
-      
-      // Check if score is below 75% - if so, show project mismatch dialog
-      if (initialScore.totalScore < 75) {
-        setShowProjectMismatch(true);
-        // Do NOT set setIsOptimizing(false) here, as we are waiting for user interaction
+      // Check for missing sections
+      const missing = checkForMissingSections(parsedResume);
+      if (missing.length > 0) {
+        setMissingSections(missing);
+        setPendingResumeData(parsedResume);
+        setShowMissingSectionsModal(true);
+        setIsOptimizing(false);
         return;
       }
       
-      // If score is 75% or above, proceed with normal optimization
-      await proceedWithOptimization(parsedResume, initialScore);
+      // Continue with optimization process
+      await continueOptimizationProcess(parsedResume);
+      
+    } catch (error) {
+      console.error('Error optimizing resume:', error);
+      alert('Failed to optimize resume. Please try again.');
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+  
+  const checkForMissingSections = (resumeData: ResumeData): string[] => {
+    const missing: string[] = [];
+    
+    // Check work experience
+    if (!resumeData.workExperience || resumeData.workExperience.length === 0) {
+      missing.push('workExperience');
+    }
+    
+    // Check projects
+    if (!resumeData.projects || resumeData.projects.length === 0) {
+      missing.push('projects');
+    }
+    
+    // Check certifications
+    if (!resumeData.certifications || resumeData.certifications.length === 0) {
+      missing.push('certifications');
+    }
+    
+    return missing;
+  };
+  
+  const handleMissingSectionsProvided = (data: any) => {
+    if (!pendingResumeData) return;
+    
+    // Merge the provided data with existing resume data
+    const updatedResume = {
+      ...pendingResumeData,
+      ...(data.workExperience && { workExperience: data.workExperience }),
+      ...(data.projects && { projects: data.projects }),
+      ...(data.certifications && { certifications: data.certifications })
+    };
+    
+    setParsedResumeData(updatedResume);
+    setShowMissingSectionsModal(false);
+    setMissingSections([]);
+    setPendingResumeData(null);
+    
+    // Continue with optimization process
+    continueOptimizationProcess(updatedResume);
+  };
+  
+  const continueOptimizationProcess = async (resumeData: ResumeData) => {
+    try {
+      setIsOptimizing(true);
+      
+      // Get initial detailed score
+      const initialScore = await getDetailedResumeScore(resumeData, jobDescription);
+      setInitialResumeScore(initialScore);
+
+      // Use advanced project analyzer to check project alignment
+      if (resumeData.projects && resumeData.projects.length > 0) {
+        try {
+          const projectAnalysis = await advancedProjectAnalyzer.analyzeAndReplaceProjects(
+            resumeData,
+            targetRole || 'Software Engineer',
+            jobDescription
+          );
+          
+          // Check if any projects need replacement (score below 80)
+          const hasLowScoringProjects = projectAnalysis.projectsToReplace.some(p => p.score < 80);
+          
+          if (hasLowScoringProjects) {
+            // Show project analysis modal for user to review and replace projects
+            setShowProjectAnalysis(true);
+            setIsOptimizing(false);
+            return;
+          }
+        } catch (projectError) {
+          console.warn('Project analysis failed, continuing with original projects:', projectError);
+        }
+      }
+      
+      // If all projects are well-aligned or no projects, proceed with normal optimization
+      await proceedWithOptimization(resumeData, initialScore);
       
     } catch (error) {
       console.error('Error optimizing resume:', error);
@@ -442,6 +519,19 @@ const ResumeOptimizer: React.FC = () => {
           resumeData={optimizedResume!}
           jobDescription={jobDescription}
           targetRole="Target Role"
+        />
+
+        {/* Missing Sections Modal */}
+        <MissingSectionsModal
+          isOpen={showMissingSectionsModal}
+          onClose={() => {
+            setShowMissingSectionsModal(false);
+            setMissingSections([]);
+            setPendingResumeData(null);
+            setIsOptimizing(false);
+          }}
+          missingSections={missingSections}
+          onSectionsProvided={handleMissingSectionsProvided}
         />
       ) : null
     }

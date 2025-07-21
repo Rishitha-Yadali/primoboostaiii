@@ -260,6 +260,20 @@ GitHub URL provided: ${githubUrl || 'NONE - leave empty'}`;
         });
       }
 
+      // Ensure work experience is properly formatted
+      if (parsedResult.workExperience && Array.isArray(parsedResult.workExperience)) {
+        parsedResult.workExperience = parsedResult.workExperience.filter((work: any) => 
+          work && work.role && work.company && work.year
+        );
+      }
+
+      // Ensure projects are properly formatted
+      if (parsedResult.projects && Array.isArray(parsedResult.projects)) {
+        parsedResult.projects = parsedResult.projects.filter((project: any) => 
+          project && project.title && project.bullets && project.bullets.length > 0
+        );
+      }
+
       // CRITICAL: Only use provided social links - empty string if not provided
       parsedResult.linkedin = linkedinUrl || "";
       parsedResult.github = githubUrl || "";
