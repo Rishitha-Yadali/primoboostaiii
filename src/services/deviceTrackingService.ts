@@ -297,19 +297,31 @@ class DeviceTrackingService {
   // Calculate risk score for activity
   private async calculateRiskScore(userId: string, ip: string, location: any): Promise<number> {
     try {
-      const { data, error } = await supabase.rpc('detect_suspicious_activity', {
-        user_uuid: userId,
-        ip_address_param: ip,
-        location_param: location,
-        user_agent_param: navigator.userAgent
-      });
+      // Try to call the RPC function, but handle gracefully if it doesn't exist
+      try {
+        const { data, error } = await supabase.rpc('detect_suspicious_activity', {
+          user_uuid: userId,
+          ip_address_param: ip,
+          location_param: location,
+          user_agent_param: navigator.userAgent
+        });
 
-      if (error) {
-        console.error('Error calculating risk score:', error);
+        if (error) {
+          // If the function doesn't exist, return default risk score
+          if (error.message?.includes('function') || error.message?.includes('does not exist')) {
+            console.warn('Risk scoring function not available, using default score');
+            return 0;
+          }
+          console.error('Error calculating risk score:', error);
+          return 0;
+        }
+
+        return data || 0;
+      } catch (rpcError) {
+        // Handle network errors or RPC function not existing
+        console.warn('Risk scoring RPC call failed, using default score:', rpcError);
         return 0;
       }
-
-      return data || 0;
     } catch (error) {
       console.error('Error in calculateRiskScore:', error);
       return 0;
