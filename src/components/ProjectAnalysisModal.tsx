@@ -5,6 +5,7 @@ import {
   XCircle, 
   Github, 
   AlertTriangle, 
+  AlertCircle,
   Loader2, 
   Plus,
   ArrowRight,
