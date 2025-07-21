@@ -500,18 +500,21 @@ const ResumeOptimizer: React.FC = () => {
 
   // Mobile interface sections
   const mobileSections = [
-    {
-      id: 'resume',
-      title: 'Optimized Resume',
-      icon: <FileText className="w-5 h-5" />,
-      component: optimizedResume ? <ResumePreview resumeData={optimizedResume} userType={userType} /> : null,
-      resumeData: optimizedResume
-    },
-    {
-      id: 'analysis',
-      title: 'Analysis',
-      icon: <BarChart3 className="w-5 h-5" />,
-      component: beforeScore && afterScore ? (
+  {
+    id: 'resume',
+    title: 'Optimized Resume',
+    icon: <FileText className="w-5 h-5" />,
+    component: optimizedResume ? (
+      <ResumePreview resumeData={optimizedResume} userType={userType} />
+    ) : null,
+    resumeData: optimizedResume
+  },
+  {
+    id: 'analysis',
+    title: 'Analysis',
+    icon: <BarChart3 className="w-5 h-5" />,
+    component: beforeScore && afterScore ? (
+      <>
         <ComprehensiveAnalysis
           beforeScore={beforeScore}
           afterScore={afterScore}
@@ -520,8 +523,6 @@ const ResumeOptimizer: React.FC = () => {
           jobDescription={jobDescription}
           targetRole="Target Role"
         />
-
-        {/* Missing Sections Modal */}
         <MissingSectionsModal
           isOpen={showMissingSectionsModal}
           onClose={() => {
@@ -533,9 +534,11 @@ const ResumeOptimizer: React.FC = () => {
           missingSections={missingSections}
           onSectionsProvided={handleMissingSectionsProvided}
         />
-      ) : null
-    }
-  ];
+      </>
+    ) : null
+  }
+];
+
 
   if (showMobileInterface && optimizedResume) {
     return <MobileOptimizedInterface sections={mobileSections} />;
