@@ -57,6 +57,7 @@ const ResumeOptimizer: React.FC = () => {
   const [currentStep, setCurrentStep] = useState(1);
   const [showMissingSectionsModal, setShowMissingSectionsModal] = useState(false);
   const [missingSections, setMissingSections] = useState<string[]>([]);
+  const [isProcessingMissingSections, setIsProcessingMissingSections] = useState(false);
   const [pendingResumeData, setPendingResumeData] = useState<ResumeData | null>(null);
   const [isCalculatingScore, setIsCalculatingScore] = useState(false);
 
@@ -195,6 +196,7 @@ const ResumeOptimizer: React.FC = () => {
     } catch (error) {
       console.error('Error in initial resume processing:', error);
       alert('Failed to process resume. Please try again.');
+      setIsProcessingMissingSections(false);
     } finally {
       setIsCalculatingScore(false);
     }
@@ -221,23 +223,31 @@ const ResumeOptimizer: React.FC = () => {
     return missing;
   };
   
-  const handleMissingSectionsProvided = (data: any) => {
-    if (!pendingResumeData) return;
-    
-    // Merge the provided data with existing resume data
-    const updatedResume = {
-      ...pendingResumeData,
-      ...(data.workExperience && { workExperience: data.workExperience }),
-      ...(data.projects && { projects: data.projects }),
-      ...(data.certifications && { certifications: data.certifications })
-    };
-    
-    setShowMissingSectionsModal(false);
-    setMissingSections([]);
-    setPendingResumeData(null);
-    
-    // Continue with initial resume processing
-    handleInitialResumeProcessing(updatedResume);
+  const handleMissingSectionsProvided = async (data: any) => {
+    setIsProcessingMissingSections(true);
+    try {
+      if (!pendingResumeData) return;
+      
+      // Merge the provided data with existing resume data
+      const updatedResume = {
+        ...pendingResumeData,
+        ...(data.workExperience && { workExperience: data.workExperience }),
+        ...(data.projects && { projects: data.projects }),
+        ...(data.certifications && { certifications: data.certifications })
+      };
+      
+      setShowMissingSectionsModal(false);
+      setMissingSections([]);
+      setPendingResumeData(null);
+      
+      // Continue with initial resume processing
+      await handleInitialResumeProcessing(updatedResume);
+    } catch (error) {
+      console.error('Error processing missing sections:', error);
+      alert('Failed to process the provided information. Please try again.');
+    } finally {
+      setIsProcessingMissingSections(false);
+    }
   };
   
   // Renamed to be more specific about its purpose
@@ -1089,6 +1099,36 @@ const ResumeOptimizer: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Missing Sections Processing Loader */}
+      {isProcessingMissingSections && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 text-center">
+            <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+              <div className="animate-spin rounded-full h-8 w-8 border-4 border-blue-600 border-t-transparent"></div>
+            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-3">Processing Your Information</h2>
+            <p className="text-gray-600 mb-4">
+              We're updating your resume with the new sections you provided...
+            </p>
+            <div className="space-y-2 text-sm text-gray-500">
+              <div className="flex items-center justify-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span>Analyzing new content</span>
+              </div>
+              <div className="flex items-center justify-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span>Calculating resume score</span>
+              </div>
+              <div className="flex items-center justify-center">
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span>Preparing optimization</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modals */}
       <>
         <ProjectEnhancement
