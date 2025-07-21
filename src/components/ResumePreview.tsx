@@ -546,23 +546,23 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, userTy
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+    <div className="card">
       <div 
-        className="pt-6 px-8 pb-8 max-h-[800px] overflow-y-auto" 
+        className="pt-4 px-4 pb-6 sm:pt-6 sm:px-6 sm:pb-8 lg:px-8 max-h-[70vh] sm:max-h-[80vh] lg:max-h-[800px] overflow-y-auto" 
         style={{ 
           fontFamily: 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif', 
-          fontSize: '11pt', 
+          fontSize: 'clamp(10pt, 2.5vw, 11pt)', 
           lineHeight: '1.15', 
           color: '#000'
         }}
       >
         {/* Header */}
-        <div className="text-center mb-6" style={{ marginBottom: '24pt' }}>
+        <div className="text-center mb-4 sm:mb-6" style={{ marginBottom: 'clamp(16pt, 4vw, 24pt)' }}>
           <h1 className="font-bold mb-3 tracking-widest uppercase" style={{ 
-            fontSize: '18pt', 
+            fontSize: 'clamp(16pt, 4vw, 18pt)', 
             fontWeight: 'bold', 
             letterSpacing: '2pt',
-            marginBottom: '12pt',
+            marginBottom: 'clamp(8pt, 2vw, 12pt)',
             fontFamily: 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
           }}>
             {resumeData.name}
@@ -570,21 +570,21 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, userTy
           
           {/* Contact Information */}
           {contactElements.length > 0 && (
-            <div className="flex justify-center items-center gap-3 flex-wrap mb-4" style={{ 
-              fontSize: '11pt',
-              marginBottom: '12pt'
+            <div className="flex justify-center items-center gap-2 sm:gap-3 flex-wrap mb-3 sm:mb-4" style={{ 
+              fontSize: 'clamp(9pt, 2vw, 11pt)',
+              marginBottom: 'clamp(8pt, 2vw, 12pt)'
             }}>
               {contactElements.map((element, index) => (
                 <React.Fragment key={index}>
                   {element}
-                  {index < contactElements.length - 1 && <span>•</span>}
+                  {index < contactElements.length - 1 && <span className="hidden sm:inline">•</span>}
                 </React.Fragment>
               ))}
             </div>
           )}
           
           {/* Horizontal line under contact info */}
-          <div className="border-b-2 border-gray-600 mx-8" style={{ 
+          <div className="border-b-2 border-secondary-600 mx-4 sm:mx-8" style={{ 
             borderBottomWidth: '2px', 
             borderColor: '#4B5563'
           }}></div>
@@ -595,29 +595,29 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, userTy
         
         {/* GitHub References Section - Always at the end */}
         {resumeData.projects?.some(project => project.githubUrl) && (
-          <div className="mb-6" style={{ marginBottom: '18pt' }}>
+          <div className="mb-4 sm:mb-6" style={{ marginBottom: 'clamp(12pt, 3vw, 18pt)' }}>
             <h2 className="font-bold mb-2 uppercase tracking-wide" style={{ 
-              fontSize: '14pt', 
+              fontSize: 'clamp(12pt, 3vw, 14pt)', 
               fontWeight: 'bold', 
-              marginBottom: '6pt',
-              marginTop: '6pt',
+              marginBottom: 'clamp(4pt, 1.5vw, 6pt)',
+              marginTop: 'clamp(4pt, 1.5vw, 6pt)',
               fontFamily: 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
             }}>
               REFERENCED PROJECTS
             </h2>
-            <div className="border-b border-gray-400 mb-3" style={{ 
+            <div className="border-b border-secondary-400 mb-3" style={{ 
               borderBottomWidth: '1px', 
               borderColor: '#9CA3AF',
-              marginBottom: '12pt'
+              marginBottom: 'clamp(8pt, 2vw, 12pt)'
             }}></div>
             
-            <ul className="ml-4 space-y-1" style={{ marginLeft: '18pt' }}>
+            <ul className="ml-3 sm:ml-4 space-y-1" style={{ marginLeft: 'clamp(12pt, 3vw, 18pt)' }}>
               {resumeData.projects
                 .filter(project => project.githubUrl)
                 .map((project, index) => (
                   <li key={index} style={{ 
-                    fontSize: '11pt',
-                    marginBottom: '6pt',
+                    fontSize: 'clamp(9pt, 2vw, 11pt)',
+                    marginBottom: 'clamp(4pt, 1vw, 6pt)',
                     fontFamily: 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif'
                   }}>
                     • <strong>{project.title}:</strong>{' '}
@@ -625,7 +625,7 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, userTy
                       href={project.githubUrl} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="text-blue-600 hover:text-blue-800 transition-colors"
+                      className="text-primary-600 hover:text-primary-800 transition-colors break-all"
                     >
                       {project.githubUrl}
                     </a>

@@ -78,48 +78,48 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-gray-200 sticky top-0 z-40">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <header className="bg-white/95 backdrop-blur-sm shadow-sm border-b border-secondary-200 sticky top-0 z-40">
+        <div className="container-responsive">
+          <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl overflow-hidden shadow-lg">
+            <div className="flex items-center space-x-2 sm:space-x-3">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl overflow-hidden shadow-lg">
                 <img 
                   src="https://res.cloudinary.com/dlkovvlud/image/upload/w_1000,c_fill,ar_1:1,g_auto,r_max,bo_5px_solid_red,b_rgb:262c35/v1751536902/a-modern-logo-design-featuring-primoboos_XhhkS8E_Q5iOwxbAXB4CqQ_HnpCsJn4S1yrhb826jmMDw_nmycqj.jpg" 
                   alt="PrimoBoost AI Logo" 
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="hidden sm:block">
-                <h1 className="text-xl font-bold text-gray-900">PrimoBoost AI</h1>
-                <p className="text-xs text-gray-500 flex items-center">
+              <div className="hidden xs:block">
+                <h1 className="text-lg sm:text-xl font-bold text-secondary-900">PrimoBoost AI</h1>
+                <p className="text-xs text-secondary-500 flex items-center">
                   <Sparkles className="w-3 h-3 mr-1" />
                   Upgrade Your Resume, Unlock Your Future
                 </p>
               </div>
-              <div className="sm:hidden">
-                <h1 className="text-lg font-bold text-gray-900">PrimoBoost AI</h1>
+              <div className="xs:hidden">
+                <h1 className="text-base font-bold text-secondary-900">PrimoBoost AI</h1>
               </div>
             </div>
 
             {/* Desktop Navigation and Auth */}
-            <div className="hidden sm:flex items-center space-x-4">
+            <div className="hidden md:flex items-center space-x-4">
               {children}
               
               {isAuthenticated && user ? (
                 <div className="relative" ref={userMenuRef}>
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-3 bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 rounded-xl px-4 py-2.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-gray-200 shadow-sm"
+                    className="flex items-center space-x-3 bg-gradient-to-r from-secondary-50 to-secondary-100 hover:from-secondary-100 hover:to-secondary-200 rounded-xl px-4 py-2.5 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 border border-secondary-200 shadow-sm min-h-touch"
                   >
-                    <div className="bg-gradient-to-br from-blue-600 to-blue-700 w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
+                    <div className="bg-gradient-to-br from-primary-600 to-primary-700 w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm shadow-md">
                       {getUserInitials()}
                     </div>
                     <div className="text-left">
-                      <p className="text-sm font-semibold text-gray-900">
+                      <p className="text-sm font-semibold text-secondary-900">
                         {getGreeting()}, {getUserDisplayName()}!
                       </p>
-                      <p className="text-xs text-gray-500 truncate max-w-[150px]">
+                      <p className="text-xs text-secondary-500 truncate max-w-[150px]">
                         {user.email}
                       </p>
                     </div>
@@ -127,15 +127,15 @@ export const Header: React.FC<HeaderProps> = ({
 
                   {/* User Dropdown Menu */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-gray-200 py-2 z-50 overflow-hidden">
-                      <div className="px-4 py-3 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-secondary-200 py-2 z-50 overflow-hidden">
+                      <div className="px-4 py-3 border-b border-secondary-100 bg-gradient-to-r from-primary-50 to-accent-50">
                         <div className="flex items-center space-x-3">
-                          <div className="bg-gradient-to-br from-blue-600 to-blue-700 w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
+                          <div className="bg-gradient-to-br from-primary-600 to-primary-700 w-10 h-10 rounded-full flex items-center justify-center text-white font-semibold shadow-md">
                             {getUserInitials()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-gray-900 truncate">{user.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                            <p className="text-sm font-semibold text-secondary-900 truncate">{user.name}</p>
+                            <p className="text-xs text-secondary-500 truncate">{user.email}</p>
                           </div>
                         </div>
                       </div>
@@ -146,7 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
                           setShowDeviceManagement(true);
                           setShowUserMenu(false);
                         }}
-                        className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-3"
+                        className="w-full text-left px-4 py-3 text-sm text-secondary-700 hover:bg-secondary-50 transition-colors flex items-center space-x-3 min-h-touch"
                       >
                         <Shield className="w-4 h-4" />
                         <span>Device & Security</span>
@@ -155,7 +155,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <button
                         onClick={handleLogout}
                         disabled={isLoggingOut}
-                        className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-3 disabled:opacity-50"
+                        className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center space-x-3 disabled:opacity-50 min-h-touch"
                       >
                         {isLoggingOut ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -171,7 +171,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   onClick={() => setShowAuthModal(true)}
                   disabled={showLoadingSpinner}
-                  className={`bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold px-6 py-2.5 rounded-xl transition-all duration-200 flex items-center space-x-2 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-lg hover:shadow-xl active:scale-[0.98] ${
+                  className={`btn-primary px-6 py-2.5 rounded-xl flex items-center space-x-2 shadow-lg hover:shadow-xl active:scale-[0.98] ${
                     showLoadingSpinner ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
                 >
@@ -186,10 +186,10 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="sm:hidden">
+            <div className="md:hidden">
               <button
                 onClick={onMobileMenuToggle}
-                className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="min-w-touch min-h-touch p-2 text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
               >
                 {showMobileMenu ? (
                   <X className="w-6 h-6" />
@@ -210,18 +210,18 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Device Management Modal */}
       {showDeviceManagement && (
-        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm safe-area">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[95vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-gray-900">Device & Security Management</h2>
+            <div className="flex items-center justify-between p-4 sm:p-6 border-b border-secondary-200">
+              <h2 className="text-lg sm:text-xl font-semibold text-secondary-900">Device & Security Management</h2>
               <button
                 onClick={() => setShowDeviceManagement(false)}
-                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100"
+                className="min-w-touch min-h-touch w-8 h-8 flex items-center justify-center text-secondary-400 hover:text-secondary-600 transition-colors rounded-full hover:bg-secondary-100"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <DeviceManagement />
             </div>
           </div>
