@@ -1,6 +1,6 @@
 import { ResumeData } from '../types/resume';
 
-const GEMINI_API_KEY = 'AIzaSyCeUpUKMIubrF3cxtHgP793dd4RcIrJplg';
+const GEMINI_API_KEY = 'AIzaSyDZWV51wiJ976BaWu8P7yE1MxWiE4oIMvQ';
 
 interface ProjectScore {
   title: string;
