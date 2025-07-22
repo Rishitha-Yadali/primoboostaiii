@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Upload, 
-  Briefcase, 
-  User, 
-  Users, 
-  MapPin, 
-  Target, 
-  ArrowRight, 
+import {
+  Upload,
+  Briefcase,
+  User,
+  Users,
+  MapPin,
+  Target,
+  ArrowRight,
   ArrowLeft,
   Plus,
   Trash2,
@@ -54,6 +54,7 @@ interface ResumeFlowCarouselProps {
   canOptimize: boolean;
   remainingOptimizations: number;
   onShowSubscriptionPlans: () => void;
+  // Add onShowAuthModal here
   onShowAuthModal: () => void;
   isAuthenticated: boolean;
 }
@@ -65,6 +66,8 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
   canOptimize,
   remainingOptimizations,
   onShowSubscriptionPlans,
+  // Destructure onShowAuthModal here
+  onShowAuthModal,
   isAuthenticated
 }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -106,7 +109,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
       case 3:
         return currentRole?.targetRole.trim() !== '';
       case 4:
-        return carouselData.roles.length > 0 && carouselData.roles.every(role => 
+        return carouselData.roles.length > 0 && carouselData.roles.every(role =>
           role.jobDescription.trim() !== '' && role.targetRole.trim() !== ''
         );
       case 5:
@@ -118,7 +121,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
 
   const handleNext = () => {
     if (!validateStep(currentStep)) return;
-    
+
     if (currentStep < totalSteps) {
       setAnimationClass('animate-slideOutLeft');
       setTimeout(() => {
@@ -147,13 +150,13 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
       githubUrl: '',
       location: ''
     };
-    
+
     setCarouselData(prev => ({
       ...prev,
       roles: [...prev.roles, newRole],
       currentRoleIndex: prev.roles.length
     }));
-    
+
     setCurrentStep(2); // Go to job description step for new role
   };
 
@@ -167,7 +170,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
 
   const deleteRole = (index: number) => {
     if (carouselData.roles.length <= 1) return; // Keep at least one role
-    
+
     setCarouselData(prev => ({
       ...prev,
       roles: prev.roles.filter((_, i) => i !== index),
@@ -178,7 +181,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
   const updateCurrentRole = (updates: Partial<RoleEntry>) => {
     setCarouselData(prev => ({
       ...prev,
-      roles: prev.roles.map((role, index) => 
+      roles: prev.roles.map((role, index) =>
         index === prev.currentRoleIndex ? { ...role, ...updates } : role
       )
     }));
@@ -215,8 +218,8 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
       {Array.from({ length: totalSteps }, (_, i) => i + 1).map((step) => (
         <div key={step} className="flex items-center">
           <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
-            step <= currentStep 
-              ? 'bg-primary-600 text-white' 
+            step <= currentStep
+              ? 'bg-primary-600 text-white'
               : 'bg-secondary-200 text-secondary-500'
           }`}>
             {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
@@ -282,7 +285,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
             <div>
               <h3 className="text-lg font-semibold text-secondary-900 mb-4">Upload Your Resume</h3>
               <FileUpload onFileUpload={(text) => setCarouselData(prev => ({ ...prev, resumeText: text }))} />
-              
+
               {carouselData.resumeText && (
                 <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl">
                   <div className="flex items-center text-green-800">
@@ -307,7 +310,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
               </div>
               <h2 className="text-2xl font-bold text-secondary-900 mb-2">Target Job Description</h2>
               <p className="text-secondary-600 mb-6">
-                {carouselData.roles.length > 1 
+                {carouselData.roles.length > 1
                   ? `Role ${carouselData.currentRoleIndex + 1} of ${carouselData.roles.length}`
                   : 'Paste the job description you want to target'
                 }
@@ -520,8 +523,8 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
               </div>
               <h2 className="text-2xl font-bold text-secondary-900 mb-2">Review & Optimize</h2>
               <p className="text-secondary-600 mb-6">
-                {isAuthenticated 
-                  ? canOptimize 
+                {isAuthenticated
+                  ? canOptimize
                     ? `You have ${remainingOptimizations} optimization${remainingOptimizations !== 1 ? 's' : ''} remaining`
                     : 'You need an active subscription to optimize resumes'
                   : 'Sign in to start optimizing your resume with AI'
@@ -532,7 +535,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
             {/* Summary */}
             <div className="bg-gray-50 rounded-xl p-6 space-y-4">
               <h3 className="font-semibold text-secondary-900 mb-4">Optimization Summary</h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="text-sm text-secondary-600 mb-1">User Type</div>
@@ -632,7 +635,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
           <p className="text-lg text-secondary-600 mb-6">
             Step {currentStep} of {totalSteps}: {getStepTitle()}
           </p>
-          
+
           {/* Step Indicator */}
           {renderStepIndicator()}
         </div>
