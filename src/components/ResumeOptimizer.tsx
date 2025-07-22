@@ -19,7 +19,7 @@ interface MissingSectionsData {
   certifications?: string[];
 }
 
-export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProps) {
+export default function ResumeOptimizer() {
   const { user, isAuthenticated } = useAuth();
   
   // Resume states
@@ -291,7 +291,6 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
         remainingOptimizations={remainingOptimizations}
         onShowSubscriptionPlans={() => setShowSubscriptionPlans(true)}
         isAuthenticated={isAuthenticated}
-        onShowAuthModal={onShowAuthModal}
       />
 
       {/* Modals */}
