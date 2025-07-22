@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FileText, BarChart3 } from 'lucide-react';
 import { ResumeData, MatchScore, UserType } from '../types/resume';
 import { optimizeResume } from '../services/geminiService';
-import { generateBeforeScore, generateAfterScore } from '../services/scoringService';
+import { getMatchScore, generateBeforeScore, generateAfterScore } from '../services/scoringService';
 import { paymentService } from '../services/paymentService';
 import { useAuth } from '../contexts/AuthContext';
 import { ResumePreview } from './ResumePreview';
@@ -14,14 +14,14 @@ import { SubscriptionPlans } from './payment/SubscriptionPlans';
 import { SubscriptionStatus } from './payment/SubscriptionStatus';
 import { ResumeFlowCarousel } from './ResumeFlowCarousel';
 
-interface ResumeOptimizerProps {
-  onShowAuthModal: () => void;
-}
-
 interface MissingSectionsData {
   workExperience?: any[];
   projects?: any[];
   certifications?: string[];
+}
+
+interface ResumeOptimizerProps {
+  onShowAuthModal: () => void;
 }
 
 export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProps) {
@@ -68,7 +68,6 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     }
   };
 
-  // ✅ [Step 1] User submits input from carousel
   const handleOptimizeResume = async ({
     resumeText,
     jobDescription,
@@ -125,7 +124,6 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
       optimized.github = githubUrl;
       optimized.targetRole = targetRole;
 
-      // ✅ [Step 2] Show project analysis modal
       setOptimizedResume(optimized);
       setShowProjectModal(true);
     } catch (err) {
@@ -135,7 +133,6 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     }
   };
 
-  // ✅ [Step 3] User completes project analysis
   const handleProjectsAnalyzed = (updatedResume: ResumeData) => {
     setShowProjectModal(false);
 
@@ -143,13 +140,12 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     if (missing.length > 0) {
       setMissingSections(missing);
       setOptimizedResume(updatedResume);
-      setShowMissingModal(true); // → Show missing sections modal
+      setShowMissingModal(true);
     } else {
-      finalizeResume(updatedResume); // → All good, finalize directly
+      finalizeResume(updatedResume);
     }
   };
 
-  // ✅ [Step 4] Missing sections provided
   const handleMissingSectionsProvided = (data: MissingSectionsData) => {
     if (!optimizedResume) return;
 
@@ -164,7 +160,6 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     finalizeResume(updated);
   };
 
-  // ✅ [Step 5] Final step → set scores and sections
   const finalizeResume = async (resume: ResumeData) => {
     const after = generateAfterScore(JSON.stringify(resume));
     setAfterScore(after);
