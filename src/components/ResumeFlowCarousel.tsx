@@ -637,13 +637,13 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className="bg-white rounded-2xl shadow-lg border border-secondary-200 overflow-hidden">
-          <div className={`p-6 lg:p-8 ${animationClass}`}>
+        <div className="bg-white rounded-2xl shadow-lg border border-secondary-200 overflow-hidden flex flex-col h-[calc(100vh-300px)] sm:h-auto">
+          <div className={`p-6 lg:p-8 ${animationClass} flex-1 overflow-y-auto`}>
             {renderStepContent()}
           </div>
 
           {/* Navigation Footer */}
-          <div className="bg-gray-50 px-6 py-4 lg:px-8 lg:py-6 border-t border-secondary-200 flex justify-between items-center">
+          <div className="bg-gray-50 px-6 py-4 lg:px-8 lg:py-6 border-t border-secondary-200 flex justify-between items-center flex-shrink-0">
             <button
               onClick={handleBack}
               disabled={currentStep === 1}
