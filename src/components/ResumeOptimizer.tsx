@@ -19,7 +19,7 @@ interface MissingSectionsData {
   certifications?: string[];
 }
 
-export default function ResumeOptimizer() {
+export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProps) {
   const { user, isAuthenticated } = useAuth();
   
   // Resume states
