@@ -54,6 +54,7 @@ interface ResumeFlowCarouselProps {
   canOptimize: boolean;
   remainingOptimizations: number;
   onShowSubscriptionPlans: () => void;
+  onShowAuthModal: () => void;
   isAuthenticated: boolean;
 }
 
