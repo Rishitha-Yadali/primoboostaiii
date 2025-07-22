@@ -291,6 +291,7 @@ export default function ResumeOptimizer() {
         remainingOptimizations={remainingOptimizations}
         onShowSubscriptionPlans={() => setShowSubscriptionPlans(true)}
         isAuthenticated={isAuthenticated}
+        onShowAuthModal={onShowAuthModal}
       />
 
       {/* Modals */}

@@ -185,7 +185,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
 
   const handleOptimizeClick = () => {
     if (!isAuthenticated) {
-      alert('Please sign in to optimize your resume');
+      onShowAuthModal();
       return;
     }
 

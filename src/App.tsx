@@ -64,7 +64,7 @@ function App() {
       default:
         return (
           <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-            <ResumeOptimizer />
+            <ResumeOptimizer onShowAuthModal={handleShowAuth} />
           </main>
         );
     }
