@@ -337,7 +337,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
             </div>
 
             {/* Help tip */}
-            <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+            <div className="bg-green-50 border border-green-200 rounded-xl p-4 mt-8">
               <div className="flex items-start space-x-3">
                 <AlertCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                 <div className="text-sm">
@@ -638,7 +638,7 @@ export const ResumeFlowCarousel: React.FC<ResumeFlowCarouselProps> = ({
 
         {/* Content Area */}
         <div className="bg-white rounded-2xl shadow-lg border border-secondary-200 overflow-hidden">
-          <div className={`p-6 lg:p-8 min-h-[600px] ${animationClass}`}>
+          <div className={`p-6 lg:p-8 ${animationClass}`}>
             {renderStepContent()}
           </div>
 
