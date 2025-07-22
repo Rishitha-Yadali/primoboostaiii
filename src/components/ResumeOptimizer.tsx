@@ -12,6 +12,7 @@ import { MissingSectionsModal } from './MissingSectionsModal';
 import { ProjectAnalysisModal } from './ProjectAnalysisModal'; // Keep if you still need ProjectAnalysisModal
 import { SubscriptionPlans } from './payment/SubscriptionPlans';
 import { SubscriptionStatus } from './payment/SubscriptionStatus';
+import { ResumeFlowCarousel } from './ResumeFlowCarousel';
 import { ResumeFlowCarousel } from './ResumeFlowCarousel'; // Import ResumeFlowCarousel
 
 interface MissingSectionsData {
@@ -20,21 +21,9 @@ interface MissingSectionsData {
   certifications?: string[];
 }
 
-interface ResumeOptimizerProps {
-  onShowAuthModal: () => void;
-}
 
-export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProps) {
+export default function ResumeOptimizer() {
   const { user, isAuthenticated } = useAuth();
-
-  // Removed local state for input fields as they will come from ResumeFlowCarousel
-  // const [resumeText, setResumeText] = useState('');
-  // const [jobDescription, setJobDescription] = useState('');
-  // const [linkedinUrl, setLinkedinUrl] = useState('');
-  // const [githubUrl, setGithubUrl] = useState('');
-  // const [location, setLocation] = useState('');
-  // const [targetRole, setTargetRole] = useState('');
-  // const [userType, setUserType] = useState<UserType>('fresher');
 
   // Resume processing states
   const [optimizedResume, setOptimizedResume] = useState<ResumeData | null>(null);
@@ -42,7 +31,7 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
   const [afterScore, setAfterScore] = useState<MatchScore | null>(null);
   const [changedSections, setChangedSections] = useState<string[]>([]);
 
-  // States to hold data received from carousel for consistent display in analysis
+  // States to hold data received from carousel for use in other components
   const [currentUserType, setCurrentUserType] = useState<UserType>('fresher');
   const [currentJobDescription, setCurrentJobDescription] = useState('');
   const [currentTargetRole, setCurrentTargetRole] = useState('');
@@ -56,7 +45,7 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
   const [canOptimize, setCanOptimize] = useState(false);
   const [remainingOptimizations, setRemainingOptimizations] = useState(0);
 
-  // Keeping ProjectAnalysisModal states as per the existing code
+  // Project analysis modal states
   const [showProjectModal, setShowProjectModal] = useState(false);
 
 
@@ -82,94 +71,11 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     }
   };
 
-  // Modified handleOptimizeResume signature to accept data object from ResumeFlowCarousel
-  const handleOptimizeResume = async (data: {
-    resumeText: string;
-    jobDescription: string;
-    userType: UserType;
-    targetRole: string;
-    linkedinUrl: string;
-    githubUrl: string;
-    location: string;
-  }) => {
-    // Basic input validation
-    if (!data.resumeText.trim() || !data.jobDescription.trim()) {
-      setOptimizationError('Please provide both resume content and job description.');
-      return;
-    }
-
-    // Authentication check
-    if (!isAuthenticated) {
-      onShowAuthModal(); // Call the prop directly
-      return;
-    }
-
-    // Subscription check
-    if (!canOptimize) {
-      setShowSubscriptionPlans(true);
-      return;
-    }
-
-    setIsOptimizing(true);
-    setOptimizationError(null); // Clear previous errors
-
-    try {
-      // Store current data for use in other functions (like analysis and modals)
-      setCurrentUserType(data.userType);
-      setCurrentJobDescription(data.jobDescription);
-      setCurrentTargetRole(data.targetRole);
-
-      // 1. Generate before score based on raw resume text
-      const beforeScoreData = generateBeforeScore(data.resumeText);
-      setBeforeScore(beforeScoreData);
-
-      // 2. Call the AI optimization service
-      const optimized = await optimizeResume(
-        data.resumeText,
-        data.jobDescription,
-        data.userType,
-        data.linkedinUrl,
-        data.githubUrl,
-        data.targetRole
-      );
-
-      // Add additional fields to the optimized resume object for later use
-      optimized.targetRole = data.targetRole;
-      optimized.linkedin = data.linkedinUrl;
-      optimized.github = data.githubUrl;
-
-      setOptimizedResume(optimized); // Store optimized resume initially
-      setShowProjectModal(true); // Trigger Project Analysis Modal
-      
-      // The rest of the processing will happen in handleProjectsAnalyzed or handleMissingSectionsProvided
-    } catch (error) {
-      console.error('Optimization error:', error);
-      setOptimizationError(error instanceof Error ? error.message : 'Optimization failed. Please try again.');
-    } finally {
-      setIsOptimizing(false); // End loading state
-    }
-  };
-
-  // This function is called after projects have been analyzed (from ProjectAnalysisModal)
-  const handleProjectsAnalyzed = (updatedResume: ResumeData) => {
-    setShowProjectModal(false); // Close the project modal
-
-    // Check for missing critical sections (after projects are handled)
-    const missing = checkMissingSections(updatedResume);
-    if (missing.length > 0) {
-      setMissingSections(missing);
-      setOptimizedResume(updatedResume); // Store updated resume
-      setShowMissingSections(true); // Show modal to prompt user for missing data
-    } else {
-      finalizeResume(updatedResume); // Proceed if no sections are missing
-    }
-  };
-
-  // Helper function to identify crucial missing sections based on user type
+  // Helper function to check for missing critical sections based on user type
   const checkMissingSections = (resumeData: ResumeData): string[] => {
     const missing: string[] = [];
 
-    // Use `currentUserType` which was set in `handleOptimizeResume`
+    // Use currentUserType which was set in handleOptimizeResume
     if (currentUserType === 'fresher') {
       if (!resumeData.workExperience || resumeData.workExperience.length === 0) {
         missing.push('workExperience'); // Could be internships for freshers
@@ -193,7 +99,7 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     return missing;
   };
 
-  // Helper function to list sections that were likely updated/are present
+  // Helper function to identify sections that were likely updated/are present
   const getChangedSections = (resumeData: ResumeData): string[] => {
     const sections: string[] = [];
 
@@ -205,7 +111,6 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     if (resumeData.education?.length) sections.push('education');
 
     // Fresher-specific sections
-    // Use `currentUserType`
     if (currentUserType === 'fresher') {
       if (resumeData.achievements?.length) sections.push('achievements');
       if (resumeData.extraCurricularActivities?.length) sections.push('extraCurricularActivities');
@@ -214,6 +119,96 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     }
 
     return sections;
+  };
+
+  // Finalize resume processing: calculate after score, changed sections, and use credit
+  const finalizeResume = async (resume: ResumeData) => {
+    const afterScoreData = generateAfterScore(JSON.stringify(resume));
+    setAfterScore(afterScoreData);
+
+    const changed = getChangedSections(resume);
+    setChangedSections(changed);
+
+    setOptimizedResume(resume); // Set the final optimized resume for display
+
+    // Use one optimization credit from user's subscription
+    if (user) {
+      await paymentService.useOptimization(user.id);
+      await checkSubscriptionStatus(); // Refresh remaining optimizations
+    }
+  };
+
+  // Main optimization handler that accepts data from ResumeFlowCarousel
+  const handleOptimizeResume = async (data: {
+    resumeText: string;
+    jobDescription: string;
+    userType: UserType;
+    targetRole: string;
+    linkedinUrl: string;
+    githubUrl: string;
+    location: string;
+  }) => {
+    // Basic input validation
+    if (!data.resumeText.trim() || !data.jobDescription.trim()) {
+      setOptimizationError('Please provide both resume content and job description.');
+      return;
+    }
+
+    // Authentication check
+    if (!isAuthenticated) {
+      setOptimizationError('Please sign in to optimize your resume');
+      return;
+    }
+
+    // Subscription check
+    if (!canOptimize) {
+      setShowSubscriptionPlans(true);
+      return;
+    }
+
+    setIsOptimizing(true);
+    setOptimizationError(null);
+
+    try {
+      // Store current data for use in other components
+      setCurrentUserType(data.userType);
+      setCurrentJobDescription(data.jobDescription);
+      setCurrentTargetRole(data.targetRole);
+
+      // 1. Generate before score based on raw resume text
+      const beforeScoreData = generateBeforeScore(data.resumeText);
+      setBeforeScore(beforeScoreData);
+
+      // 2. Call the AI optimization service
+      const optimized = await optimizeResume(
+        data.resumeText,
+        data.jobDescription,
+        data.userType,
+        data.linkedinUrl,
+        data.githubUrl,
+        data.targetRole
+      );
+
+      // Add additional fields to the optimized resume object for later use
+      optimized.targetRole = data.targetRole;
+      optimized.linkedin = data.linkedinUrl;
+      optimized.github = data.githubUrl;
+
+      // 3. Check for missing critical sections
+      const missing = checkMissingSections(optimized);
+      if (missing.length > 0) {
+        setMissingSections(missing);
+        setOptimizedResume(optimized); // Store updated resume
+        setShowMissingSections(true); // Show modal to prompt user for missing data
+      } else {
+        finalizeResume(optimized); // Proceed if no sections are missing
+      }
+    } catch (error) {
+      console.error('Optimization error:', error);
+      setOptimizationError(error instanceof Error ? error.message : 'Optimization failed. Please try again.');
+    } finally {
+      setIsOptimizing(false);
+    }
   };
 
   // Callback when user provides missing sections from the modal
@@ -241,23 +236,7 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     finalizeResume(updatedResume); // Proceed with the finalized resume
   };
 
-  // Finalize resume processing: calculate after score, changed sections, and use credit
-  const finalizeResume = async (resume: ResumeData) => {
-    const afterScoreData = generateAfterScore(JSON.stringify(resume));
-    setAfterScore(afterScoreData);
-
-    const changed = getChangedSections(resume);
-    setChangedSections(changed);
-
-    setOptimizedResume(resume); // Set the final optimized resume for display
-
-    // Use one optimization credit from user's subscription
-    if (user) {
-      await paymentService.useOptimization(user.id);
-      await checkSubscriptionStatus(); // Refresh remaining optimizations
-    }
-  };
-
+  // Callback for successful subscription (refreshes status and closes modal)
 
   // Callback for successful subscription (refreshes status and closes modal)
   const handleSubscriptionSuccess = () => {
@@ -265,8 +244,7 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     checkSubscriptionStatus();
   };
 
-  // Determine which interface to show: carousel input flow or optimized resume/analysis
-  // If optimizedResume exists, show the MobileOptimizedInterface
+  // If optimizedResume exists, show the results interface
   if (optimizedResume) {
     const sections = [];
     sections.push({
@@ -298,38 +276,28 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     return <MobileOptimizedInterface sections={sections} />;
   }
 
-  // Otherwise, render the ResumeFlowCarousel for input
+  // Render the input flow and subscription status
   return (
     <div>
-      {/* Subscription Status Display - Can be kept outside the carousel for persistent visibility */}
+      {/* Subscription Status Display */}
       {isAuthenticated && (
         <div className="container-responsive py-6">
           <SubscriptionStatus onUpgrade={() => setShowSubscriptionPlans(true)} />
         </div>
       )}
 
-      {/* Render the ResumeFlowCarousel for the input process */}
+      {/* Main Input Flow */}
       <ResumeFlowCarousel
-        onOptimize={handleOptimizeResume} // Pass the updated handleOptimizeResume
+        onOptimize={handleOptimizeResume}
         isOptimizing={isOptimizing}
         optimizationError={optimizationError}
         canOptimize={canOptimize}
         remainingOptimizations={remainingOptimizations}
         onShowSubscriptionPlans={() => setShowSubscriptionPlans(true)}
         isAuthenticated={isAuthenticated}
-        onShowAuthModal={onShowAuthModal} // Ensure onShowAuthModal is passed down
       />
 
-      {/* Modals rendered outside the main layout flow */}
-      <ProjectAnalysisModal
-        isOpen={showProjectModal}
-        onClose={() => setShowProjectModal(false)}
-        resumeData={optimizedResume || {} as ResumeData} // Pass optimizedResume data
-        jobDescription={currentJobDescription} // Pass job description
-        targetRole={currentTargetRole} // Pass target role
-        onProjectsUpdated={handleProjectsAnalyzed}
-      />
-
+      {/* Modals */}
       <MissingSectionsModal
         isOpen={showMissingSections}
         onClose={() => setShowMissingSections(false)}
