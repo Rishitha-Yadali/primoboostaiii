@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Crown, Calendar, Zap, AlertCircle, CheckCircle, RefreshCw, ChevronDown } from 'lucide-react';
+import { Crown, Calendar, Zap, AlertCircle, CheckCircle, RefreshCw } from 'lucide-react';
 import { Subscription } from '../../types/payment';
 import { paymentService } from '../../services/paymentService';
 import { useAuth } from '../../contexts/AuthContext';
@@ -134,49 +134,6 @@ export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({ onUpgrad
             </span>
           </div>
         </div>
-
-        {/* Mobile Detailed View */}
-        <div className="sm:hidden p-4">
-          <div className="space-y-4">
-            {/* Progress Bar */}
-            <div>
-              <div className="flex justify-between text-sm text-gray-600 mb-2">
-                <span>Usage Progress</span>
-                <span>{subscription.optimizationsUsed} / {subscription.optimizationsTotal}</span>
-              </div>
-              <div className="w-full bg-gray-200 rounded-full h-3">
-                <div
-                  className={`h-3 rounded-full transition-all duration-300 ${
-                    usagePercentage > 90 ? 'bg-red-500' :
-                    usagePercentage > 70 ? 'bg-orange-500' :
-                    'bg-green-500'
-                  }`}
-                  style={{ width: `${Math.min(usagePercentage, 100)}%` }}
-                ></div>
-              </div>
-            </div>
-            
-            {/* Subscription Details */}
-            <div className="bg-gray-50 rounded-xl p-3">
-              <div className="grid grid-cols-1 gap-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Start Date:</span>
-                  <span className="font-medium">{formatDate(subscription.startDate)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">End Date:</span>
-                  <span className="font-medium">{formatDate(subscription.endDate)}</span>
-                </div>
-                {subscription.couponUsed && (
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Coupon:</span>
-                    <span className="font-medium text-green-600">{subscription.couponUsed}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Usage Stats */}
@@ -247,10 +204,8 @@ export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({ onUpgrad
             )}
           </div>
         </div>
-      </div>
 
-      {/* Action Buttons */}
-      <div className="p-4 sm:p-6 border-t border-gray-200">
+        {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
           {remaining === 0 && (
             <button
@@ -279,22 +234,22 @@ export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({ onUpgrad
             </button>
           )}
         </div>
-      </div>
 
-      {/* Low Usage Warning */}
-      {remaining <= 2 && remaining > 0 && (
-        <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-xl">
-          <div className="flex items-start">
-            <AlertCircle className="w-5 h-5 text-orange-600 mr-3 mt-0.5" />
-            <div>
-              <div className="font-medium text-orange-800">Running Low on Optimizations</div>
-              <div className="text-orange-700 text-sm mt-1">
-                You have only {remaining} optimization{remaining !== 1 ? 's' : ''} left. Consider upgrading your plan to continue optimizing your resume.
+        {/* Low Usage Warning */}
+        {remaining <= 2 && remaining > 0 && (
+          <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+            <div className="flex items-start">
+              <AlertCircle className="w-5 h-5 text-orange-600 mr-3 mt-0.5" />
+              <div>
+                <div className="font-medium text-orange-800">Running Low on Optimizations</div>
+                <div className="text-orange-700 text-sm mt-1">
+                  You have only {remaining} optimization{remaining !== 1 ? 's' : ''} left. Consider upgrading your plan to continue optimizing your resume.
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
