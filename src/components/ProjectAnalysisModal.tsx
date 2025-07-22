@@ -353,16 +353,7 @@ export const ProjectAnalysisModal: React.FC<ProjectAnalysisModalProps> = ({
               >
                 Standard Analysis
               </button>
-              <button
-                onClick={() => setUseAdvancedAnalysis(true)}
-                className={`w-full sm:w-auto px-3 py-2 rounded-lg font-medium transition-colors text-sm min-h-[44px] ${
-                  useAdvancedAnalysis
-                    ? 'bg-purple-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-              >
-                Advanced Scoring (0-100)
-              </button>
+              
             </div>
           </div>
         </div>
