@@ -1,5 +1,3 @@
-// ✅ Updated ResumeOptimizer with original flow preserved and new UI layout
-
 import React, { useState, useEffect } from 'react';
 import {
   FileText,
@@ -8,19 +6,19 @@ import {
   Briefcase,
   User,
   Users,
-  Linkedin,
+  Zap,
+  AlertCircle,
+  CheckCircle,
+  Loader2,
+  ArrowRight,
   Github,
+  Linkedin,
   MapPin,
   Target,
   Sparkles,
-  Zap,
-  AlertCircle,
-  Loader2,
-  ArrowRight,
   Crown,
-  Star,
   Clock,
-  CheckCircle
+  Star
 } from 'lucide-react';
 import { ResumeData, MatchScore, UserType } from '../types/resume';
 import { optimizeResume } from '../services/geminiService';
@@ -28,13 +26,14 @@ import { getMatchScore, generateBeforeScore, generateAfterScore } from '../servi
 import { paymentService } from '../services/paymentService';
 import { useAuth } from '../contexts/AuthContext';
 import { FileUpload } from './FileUpload';
-import { InputSection } from './InputSection';
+import { InputSection } from './InputSection'; // This might become redundant or need refactoring later
 import { ResumePreview } from './ResumePreview';
 import { ComprehensiveAnalysis } from './ComprehensiveAnalysis';
 import { MobileOptimizedInterface } from './MobileOptimizedInterface';
 import { MissingSectionsModal } from './MissingSectionsModal';
 import { SubscriptionPlans } from './payment/SubscriptionPlans';
 import { SubscriptionStatus } from './payment/SubscriptionStatus';
+import { ResumeFlowCarousel } from './ResumeFlowCarousel'; // Import the new carousel component
 
 interface MissingSectionsData {
   workExperience?: any[];
@@ -43,21 +42,15 @@ interface MissingSectionsData {
 }
 
 export default function ResumeOptimizer() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, showAuthModal } = useAuth(); // Assuming showAuthModal is provided by AuthContext
 
-  const [resumeText, setResumeText] = useState('');
-  const [jobDescription, setJobDescription] = useState('');
-  const [linkedinUrl, setLinkedinUrl] = useState('');
-  const [githubUrl, setGithubUrl] = useState('');
-  const [location, setLocation] = useState('');
-  const [targetRole, setTargetRole] = useState('');
-  const [userType, setUserType] = useState<UserType>('fresher');
-
+  // Resume states (now largely managed by carousel, but needed for post-optimization display)
   const [optimizedResume, setOptimizedResume] = useState<ResumeData | null>(null);
   const [beforeScore, setBeforeScore] = useState<MatchScore | null>(null);
   const [afterScore, setAfterScore] = useState<MatchScore | null>(null);
   const [changedSections, setChangedSections] = useState<string[]>([]);
 
+  // UI states
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationError, setOptimizationError] = useState<string | null>(null);
   const [showMissingSections, setShowMissingSections] = useState(false);
@@ -66,6 +59,7 @@ export default function ResumeOptimizer() {
   const [canOptimize, setCanOptimize] = useState(false);
   const [remainingOptimizations, setRemainingOptimizations] = useState(0);
 
+  // Check subscription status
   useEffect(() => {
     checkSubscriptionStatus();
   }, [user]);
@@ -82,12 +76,30 @@ export default function ResumeOptimizer() {
       setCanOptimize(result.canOptimize);
       setRemainingOptimizations(result.remaining);
     } catch (error) {
+      console.error('Error checking subscription:', error);
       setCanOptimize(false);
       setRemainingOptimizations(0);
     }
   };
 
-  const handleOptimizeResume = async () => {
+  const handleOptimizeResume = async ({
+    resumeText,
+    jobDescription,
+    userType,
+    targetRole,
+    linkedinUrl,
+    githubUrl,
+    location,
+  }: {
+    resumeText: string;
+    jobDescription: string;
+    userType: UserType;
+    targetRole: string;
+    linkedinUrl: string;
+    githubUrl: string;
+    location: string;
+  }) => {
+    // Basic validation (more robust validation should be in the carousel)
     if (!resumeText.trim() || !jobDescription.trim()) {
       setOptimizationError('Please provide both resume content and job description');
       return;
@@ -107,9 +119,11 @@ export default function ResumeOptimizer() {
     setOptimizationError(null);
 
     try {
+      // Generate before score
       const beforeScoreData = generateBeforeScore(resumeText);
       setBeforeScore(beforeScoreData);
 
+      // Optimize resume
       const optimized = await optimizeResume(
         resumeText,
         jobDescription,
@@ -119,11 +133,14 @@ export default function ResumeOptimizer() {
         targetRole
       );
 
+      // Add additional fields
       optimized.targetRole = targetRole;
       optimized.linkedin = linkedinUrl;
       optimized.github = githubUrl;
+      optimized.location = location; // Ensure location is also added
 
-      const missing = checkMissingSections(optimized);
+      // Check for missing critical sections
+      const missing = checkMissingSections(optimized, userType); // Pass userType here
       if (missing.length > 0) {
         setMissingSections(missing);
         setOptimizedResume(optimized);
@@ -131,71 +148,110 @@ export default function ResumeOptimizer() {
         return;
       }
 
+      // Generate after score
       const afterScoreData = generateAfterScore(JSON.stringify(optimized));
       setAfterScore(afterScoreData);
 
-      const changed = getChangedSections(optimized);
+      // Determine changed sections
+      const changed = getChangedSections(optimized, userType); // Pass userType here
       setChangedSections(changed);
+
       setOptimizedResume(optimized);
 
+      // Use optimization from subscription
       if (user) {
         await paymentService.useOptimization(user.id);
-        await checkSubscriptionStatus();
+        await checkSubscriptionStatus(); // Refresh subscription status
       }
+
     } catch (error) {
+      console.error('Optimization error:', error);
       setOptimizationError(error instanceof Error ? error.message : 'Optimization failed. Please try again.');
     } finally {
       setIsOptimizing(false);
     }
   };
 
-  const checkMissingSections = (resumeData: ResumeData): string[] => {
+  const checkMissingSections = (resumeData: ResumeData, userType: UserType): string[] => {
     const missing: string[] = [];
+
     if (userType === 'fresher') {
-      if (!resumeData.workExperience?.length) missing.push('workExperience');
-      if (!resumeData.projects?.length) missing.push('projects');
+      // For freshers, check for work experience (internships) and projects
+      if (!resumeData.workExperience || resumeData.workExperience.length === 0) {
+        missing.push('workExperience');
+      }
+      if (!resumeData.projects || resumeData.projects.length === 0) {
+        missing.push('projects');
+      }
     } else {
-      if ((resumeData.workExperience?.length || 0) < 2) missing.push('workExperience');
-      if (!resumeData.projects?.length) missing.push('projects');
+      // For experienced professionals
+      if (!resumeData.workExperience || resumeData.workExperience.length < 2) {
+        missing.push('workExperience');
+      }
+      if (!resumeData.projects || resumeData.projects.length === 0) {
+        missing.push('projects');
+      }
     }
-    if (!resumeData.certifications?.length) missing.push('certifications');
+
+    if (!resumeData.certifications || resumeData.certifications.length === 0) {
+      missing.push('certifications');
+    }
+
     return missing;
   };
 
-  const getChangedSections = (resumeData: ResumeData): string[] => {
+  const getChangedSections = (resumeData: ResumeData, userType: UserType): string[] => {
     const sections: string[] = [];
+
     if (resumeData.summary) sections.push('summary');
     if (resumeData.workExperience?.length) sections.push('workExperience');
     if (resumeData.projects?.length) sections.push('projects');
     if (resumeData.skills?.length) sections.push('skills');
     if (resumeData.certifications?.length) sections.push('certifications');
     if (resumeData.education?.length) sections.push('education');
+
     if (userType === 'fresher') {
       if (resumeData.achievements?.length) sections.push('achievements');
       if (resumeData.extraCurricularActivities?.length) sections.push('extraCurricularActivities');
       if (resumeData.languagesKnown?.length) sections.push('languagesKnown');
       if (resumeData.personalDetails) sections.push('personalDetails');
     }
+
     return sections;
   };
 
   const handleMissingSectionsProvided = async (data: MissingSectionsData) => {
     if (!optimizedResume) return;
 
+    // Merge missing sections data with optimized resume
     const updatedResume = {
       ...optimizedResume,
-      workExperience: [...(optimizedResume.workExperience || []), ...(data.workExperience || [])],
-      projects: [...(optimizedResume.projects || []), ...(data.projects || [])],
-      certifications: [...(optimizedResume.certifications || []), ...(data.certifications || [])]
+      workExperience: [
+        ...(optimizedResume.workExperience || []),
+        ...(data.workExperience || [])
+      ],
+      projects: [
+        ...(optimizedResume.projects || []),
+        ...(data.projects || [])
+      ],
+      certifications: [
+        ...(optimizedResume.certifications || []),
+        ...(data.certifications || [])
+      ]
     };
 
     setOptimizedResume(updatedResume);
     setShowMissingSections(false);
 
+    // Generate after score with complete data
     const afterScoreData = generateAfterScore(JSON.stringify(updatedResume));
     setAfterScore(afterScoreData);
 
-    const changed = getChangedSections(updatedResume);
+    // Update changed sections
+    // You'll need access to the original userType used for optimization here,
+    // or store it in optimizedResume, or pass it around. For now, let's assume it's part of optimizedResume.
+    // If not, you might need to reconsider how userType is managed post-optimization.
+    const changed = getChangedSections(updatedResume, optimizedResume.userType || 'fresher'); // Assuming userType is now part of ResumeData
     setChangedSections(changed);
   };
 
@@ -204,104 +260,86 @@ export default function ResumeOptimizer() {
     checkSubscriptionStatus();
   };
 
+  // Prepare sections for MobileOptimizedInterface
   const sections = [];
+
+  // Always include preview section if we have optimized resume
   if (optimizedResume) {
     sections.push({
       id: 'preview',
       title: 'Preview',
       icon: <FileText className="w-5 h-5" />,
-      component: <ResumePreview resumeData={optimizedResume} userType={userType} />,
+      component: <ResumePreview resumeData={optimizedResume} userType={optimizedResume.userType || 'fresher'} />,
       resumeData: optimizedResume,
     });
   }
+
+  // Add score section if we have both scores
   if (beforeScore && afterScore && optimizedResume) {
     sections.push({
       id: 'analysis',
       title: 'Analysis',
       icon: <BarChart3 className="w-5 h-5" />,
-      component: <ComprehensiveAnalysis beforeScore={beforeScore} afterScore={afterScore} changedSections={changedSections} resumeData={optimizedResume} jobDescription={jobDescription} targetRole={targetRole} />,
+      component: (
+        <ComprehensiveAnalysis
+          beforeScore={beforeScore}
+          afterScore={afterScore}
+          changedSections={changedSections}
+          resumeData={optimizedResume}
+          jobDescription={optimizedResume.jobDescription || ''} // Assuming jobDescription is now part of optimizedResume
+          targetRole={optimizedResume.targetRole || ''} // Assuming targetRole is now part of optimizedResume
+        />
+      ),
       resumeData: optimizedResume,
     });
   }
-  if (sections.length > 0) return <MobileOptimizedInterface sections={sections} />;
 
+  // If we have sections to show (i.e., resume has been optimized), render MobileOptimizedInterface
+  if (sections.length > 0) {
+    return (
+      <>
+        <MobileOptimizedInterface sections={sections} />
+        <MissingSectionsModal
+          isOpen={showMissingSections}
+          onClose={() => setShowMissingSections(false)}
+          missingSections={missingSections}
+          onSectionsProvided={handleMissingSectionsProvided}
+        />
+        <SubscriptionPlans
+          isOpen={showSubscriptionPlans}
+          onClose={() => setShowSubscriptionPlans(false)}
+          onSubscriptionSuccess={handleSubscriptionSuccess}
+        />
+      </>
+    );
+  }
+
+  // Otherwise, render the main carousel form
   return (
-    <div className="container-responsive py-10">
-      <div className="text-center mb-10">
-        <div className="bg-primary-600 text-white w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4">
-          <Sparkles className="w-7 h-7" />
-        </div>
-        <h1 className="text-3xl font-bold text-secondary-900">AI Resume Optimizer</h1>
-        <p className="text-secondary-600 max-w-xl mx-auto mt-2">
-          Instantly tailor your resume to job descriptions with AI-powered optimization.
-        </p>
-      </div>
+    <>
+      <ResumeFlowCarousel
+        onOptimize={handleOptimizeResume}
+        isOptimizing={isOptimizing}
+        optimizationError={optimizationError}
+        canOptimize={canOptimize}
+        remainingOptimizations={remainingOptimizations}
+        onShowSubscriptionPlans={() => setShowSubscriptionPlans(true)}
+        onShowAuthModal={showAuthModal} // Pass the showAuthModal from AuthContext
+        isAuthenticated={isAuthenticated}
+      />
 
-      {isAuthenticated && <SubscriptionStatus onUpgrade={() => setShowSubscriptionPlans(true)} />}
+      <MissingSectionsModal
+        isOpen={showMissingSections}
+        onClose={() => setShowMissingSections(false)}
+        missingSections={missingSections}
+        onSectionsProvided={handleMissingSectionsProvided}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-10">
-        <div className="space-y-6">
-          <div className="card p-6">
-            <h3 className="font-semibold mb-4 flex items-center"><User className="w-5 h-5 mr-2" />I am a...</h3>
-            <div className="flex gap-4">
-              <button onClick={() => setUserType('fresher')} className={`btn ${userType === 'fresher' ? 'btn-primary' : 'btn-outline'}`}>Fresher</button>
-              <button onClick={() => setUserType('experienced')} className={`btn ${userType === 'experienced' ? 'btn-primary' : 'btn-outline'}`}>Experienced</button>
-            </div>
-          </div>
-
-          <div className="card p-6">
-            <h3 className="font-semibold mb-4 flex items-center"><Upload className="w-5 h-5 mr-2" />Upload Resume</h3>
-            <FileUpload onFileUpload={setResumeText} />
-          </div>
-
-          <div className="card p-6">
-            <InputSection resumeText={resumeText} jobDescription={jobDescription} onResumeChange={setResumeText} onJobDescriptionChange={setJobDescription} />
-          </div>
-
-          <div className="card p-6">
-            <h3 className="font-semibold mb-4 flex items-center"><Target className="w-5 h-5 mr-2 text-green-600" />Additional Info</h3>
-            <input className="input-base mb-4" value={targetRole} onChange={(e) => setTargetRole(e.target.value)} placeholder="Target Role (e.g. Data Scientist)" />
-            <input className="input-base mb-4" value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="LinkedIn URL" />
-            <input className="input-base mb-4" value={githubUrl} onChange={(e) => setGithubUrl(e.target.value)} placeholder="GitHub URL" />
-            <input className="input-base" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" />
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <div className="card p-6 text-center">
-            <div className="mb-4">
-              <Zap className="w-8 h-8 text-primary-600 mx-auto" />
-            </div>
-            <h3 className="text-xl font-bold">Ready to Optimize?</h3>
-            <p className="text-secondary-600 mt-2">
-              {isAuthenticated ? (canOptimize ? `You have ${remainingOptimizations} optimizations left` : 'No optimizations left') : 'Please sign in to continue'}
-            </p>
-
-            {optimizationError && <p className="text-red-600 mt-2 text-sm flex items-center justify-center"><AlertCircle className="w-4 h-4 mr-1" />{optimizationError}</p>}
-
-            <button onClick={handleOptimizeResume} disabled={isOptimizing || !resumeText || !jobDescription} className="btn btn-primary w-full mt-4">
-              {isOptimizing ? <><Loader2 className="animate-spin w-4 h-4 mr-2" /> Optimizing...</> : <><Sparkles className="w-4 h-4 mr-2" /> Optimize Resume <ArrowRight className="w-4 h-4 ml-2" /></>}
-            </button>
-
-            {isAuthenticated && !canOptimize && (
-              <button onClick={() => setShowSubscriptionPlans(true)} className="btn w-full mt-4 bg-gradient-to-r from-orange-500 to-red-500 text-white">
-                <Crown className="w-4 h-4 mr-2" /> Choose Subscription Plan
-              </button>
-            )}
-          </div>
-
-          <div className="card p-6 bg-gradient-to-r from-primary-50 to-accent-50 border-primary-200">
-            <h3 className="text-center text-lg font-semibold text-secondary-900 mb-2">Affordable Pricing</h3>
-            <div className="flex justify-center gap-6 text-sm">
-              <div className="flex items-center"><Clock className="w-4 h-4 mr-1 text-primary-600" />1 Hour: ₹19</div>
-              <div className="flex items-center"><Zap className="w-4 h-4 mr-1 text-green-600" />1 Week: ₹129</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <MissingSectionsModal isOpen={showMissingSections} onClose={() => setShowMissingSections(false)} missingSections={missingSections} onSectionsProvided={handleMissingSectionsProvided} />
-      <SubscriptionPlans isOpen={showSubscriptionPlans} onClose={() => setShowSubscriptionPlans(false)} onSubscriptionSuccess={handleSubscriptionSuccess} />
-    </div>
+      <SubscriptionPlans
+        isOpen={showSubscriptionPlans}
+        onClose={() => setShowSubscriptionPlans(false)}
+        onSubscriptionSuccess={handleSubscriptionSuccess}
+      />
+    </>
   );
 }
