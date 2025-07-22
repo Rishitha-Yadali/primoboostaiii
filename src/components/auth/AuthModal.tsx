@@ -60,28 +60,25 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div 
-      className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-sm"
-      onClick={handleBackdropClick}
-    >
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[95vh] overflow-y-auto border border-gray-100">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm" onClick={handleBackdropClick}>
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-[95vw] sm:max-w-md max-h-[98vh] sm:max-h-[95vh] overflow-y-auto border border-gray-100">
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 px-6 py-8 border-b border-gray-100">
+        <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 px-4 sm:px-6 py-4 sm:py-8 border-b border-gray-100">
           <button
             onClick={handleCloseClick}
-            className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/50 z-10"
+            className="absolute top-2 sm:top-4 right-2 sm:right-4 w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/50 z-10 min-w-[44px] min-h-[44px]"
           >
-            <X className="w-5 h-5" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
           
           <div className="text-center">
-            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-              <Sparkles className="w-8 h-8 text-white" />
+            <div className="bg-gradient-to-br from-blue-600 to-indigo-600 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
+              <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            <h1 className="text-lg sm:text-2xl font-bold text-gray-900 mb-2 px-4">
               {getTitle()}
             </h1>
-            <p className="text-gray-600 text-sm">
+            <p className="text-gray-600 text-xs sm:text-sm px-4">
               {currentView === 'login' && 'Sign in to optimize your resume with AI'}
               {currentView === 'signup' && 'Create your account and start optimizing'}
               {currentView === 'forgot-password' && 'We\'ll help you reset your password'}
@@ -91,7 +88,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {currentView === 'login' && (
             <LoginForm
               onSwitchToSignup={() => setCurrentView('signup')}
@@ -115,12 +112,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({
           )}
           
           {currentView === 'success' && (
-            <div className="text-center py-8">
-              <div className="bg-green-100 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10 text-green-600" />
+            <div className="text-center py-6 sm:py-8">
+              <div className="bg-green-100 w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-3">All Set!</h2>
-              <p className="text-gray-600 leading-relaxed">
+              <h2 className="text-lg sm:text-2xl font-bold text-gray-900 mb-3">All Set!</h2>
+              <p className="text-sm sm:text-base text-gray-600 leading-relaxed px-4">
                 {currentView === 'success' && currentView === 'signup' 
                   ? 'Your account has been created successfully. You can now start optimizing your resume!'
                   : 'Check your email for the password reset link.'
