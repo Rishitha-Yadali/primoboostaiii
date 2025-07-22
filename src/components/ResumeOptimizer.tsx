@@ -93,13 +93,16 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     setOptimizationError(null);
 
     try {
+      // Step 1: Generate before score
       const before = generateBeforeScore(data.resumeText);
       setBeforeScore(before);
 
+      // Step 2: Store current optimization context
       setCurrentUserType(data.userType);
       setCurrentJobDescription(data.jobDescription);
       setCurrentTargetRole(data.targetRole);
 
+      // Step 3: Call optimizeResume API
       const optimized = await optimizeResume(
         data.resumeText,
         data.jobDescription,
@@ -109,12 +112,14 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
         data.targetRole
       );
 
+      // Step 4: Set additional resume properties
       optimized.targetRole = data.targetRole;
       optimized.linkedin = data.linkedinUrl;
       optimized.github = data.githubUrl;
 
+      // Step 5: Set optimized resume and show ProjectAnalysisModal
       setOptimizedResume(optimized);
-      setShowProjectAnalysis(true); // Step 1: open project modal
+      setShowProjectAnalysis(true); // → show ProjectAnalysisModal
     } catch (err) {
       setOptimizationError(
         err instanceof Error ? err.message : 'Optimization failed. Please try again.'
@@ -124,32 +129,47 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     }
   };
 
+  // Step 6: handleProjectsAnalyzed() - Called when ProjectAnalysisModal closes
   const handleProjectsAnalyzed = (resumeWithProjects: ResumeData) => {
+    // Close ProjectAnalysisModal
     setShowProjectAnalysis(false);
+    
+    // → checkMissingSections()
     const missing = checkMissingSections(resumeWithProjects, currentUserType);
 
     if (missing.length > 0) {
+      // ├── If missing → MissingSectionsModal
       setMissingSections(missing);
       setOptimizedResume(resumeWithProjects);
-      setShowMissingSections(true); // Step 2: open missing modal
+      setShowMissingSections(true);
     } else {
-      finalizeOptimization(resumeWithProjects);
+      // └── Else → processPostOptimizationSteps()
+      processPostOptimizationSteps(resumeWithProjects);
     }
   };
 
+  // Step 7: handleMissingSectionsProvided() - Called when MissingSectionsModal closes
   const handleMissingSectionsProvided = (data: MissingSectionsData) => {
     if (!optimizedResume) return;
+    
+    // Merge missing sections data with optimized resume
     const updated = {
       ...optimizedResume,
       workExperience: [...(optimizedResume.workExperience || []), ...(data.workExperience || [])],
       projects: [...(optimizedResume.projects || []), ...(data.projects || [])],
       certifications: [...(optimizedResume.certifications || []), ...(data.certifications || [])],
     };
+    
+    // Close MissingSectionsModal
     setShowMissingSections(false);
-    finalizeOptimization(updated); // Step 3: finalize
+    
+    // → processPostOptimizationSteps()
+    processPostOptimizationSteps(updated);
   };
 
-  const finalizeOptimization = async (finalResume: ResumeData) => {
+  // Step 8: processPostOptimizationSteps() - Final processing step
+  const processPostOptimizationSteps = async (finalResume: ResumeData) => {
+    // setOptimizedResume + afterScore + changedSections
     const after = generateAfterScore(JSON.stringify(finalResume));
     setAfterScore(after);
 
@@ -158,10 +178,14 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
 
     setOptimizedResume(finalResume);
 
+    // Handle subscription usage
     if (user) {
       await paymentService.useOptimization(user.id);
       await checkSubscriptionStatus();
     }
+    
+    // → MobileOptimizedInterface (Preview + Score) will render automatically
+    // due to the conditions in the render method
   };
 
   const handleSubscriptionSuccess = () => {
