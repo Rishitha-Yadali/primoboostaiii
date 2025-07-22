@@ -263,7 +263,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm" onClick={handleBackdropClick}>
-      <div className="bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[95vw] sm:max-w-7xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden">
+      <div className="bg-white rounded-xl sm:rounded-2xl lg:rounded-3xl shadow-2xl w-full max-w-[95vw] sm:max-w-7xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="relative bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 px-3 sm:px-6 py-4 sm:py-8 border-b border-gray-100">
           <button
@@ -286,7 +286,7 @@ export const SubscriptionPlans: React.FC<SubscriptionPlansProps> = ({
           </div>
         </div>
 
-        <div className="p-3 sm:p-6 lg:p-8 overflow-y-auto max-h-[calc(98vh-150px)] sm:max-h-[calc(95vh-200px)]">
+        <div className="p-3 sm:p-6 lg:p-8 overflow-y-auto flex-1 min-h-0">
           {/* Mobile Carousel (visible on mobile) */}
           <div className="block md:hidden mb-4 sm:mb-8">
             <div className="relative">

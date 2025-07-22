@@ -61,9 +61,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm" onClick={handleBackdropClick}>
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-[95vw] sm:max-w-md max-h-[98vh] sm:max-h-[95vh] overflow-y-auto border border-gray-100">
+      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl w-full max-w-[95vw] sm:max-w-md max-h-[98vh] sm:max-h-[95vh] border border-gray-100 flex flex-col">
         {/* Header */}
-        <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 px-4 sm:px-6 py-4 sm:py-8 border-b border-gray-100">
+        <div className="relative bg-gradient-to-br from-blue-50 to-indigo-50 px-4 sm:px-6 py-4 sm:py-8 border-b border-gray-100 flex-shrink-0">
           <button
             onClick={handleCloseClick}
             className="absolute top-2 sm:top-4 right-2 sm:right-4 w-10 h-10 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-white/50 z-10 min-w-[44px] min-h-[44px]"
@@ -88,7 +88,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-4 sm:p-6">
+        <div className="p-4 sm:p-6 overflow-y-auto flex-1 min-h-0">
           {currentView === 'login' && (
             <LoginForm
               onSwitchToSignup={() => setCurrentView('signup')}

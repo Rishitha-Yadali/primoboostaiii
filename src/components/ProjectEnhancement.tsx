@@ -211,7 +211,7 @@ export const ProjectEnhancement: React.FC<ProjectEnhancementProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-6xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-6xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-purple-50 to-blue-50 p-3 sm:p-6 border-b border-gray-200">
           <button
@@ -234,9 +234,9 @@ export const ProjectEnhancement: React.FC<ProjectEnhancementProps> = ({
           </div>
         </div>
 
-        <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(98vh-200px)] sm:max-h-[calc(95vh-250px)]">
+        <div className="p-3 sm:p-6 overflow-y-auto flex-1 min-h-0">
           {/* Mode Selection */}
-          <div className="mb-4 sm:mb-6">
+          <div className="mb-4 sm:mb-6 flex-shrink-0">
             <div className="grid grid-cols-1 sm:flex sm:flex-wrap gap-2 sm:gap-3">
               <button
                 onClick={() => setMode('manual')}

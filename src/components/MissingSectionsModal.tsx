@@ -445,7 +445,7 @@ export const MissingSectionsModal: React.FC<MissingSectionsModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm" onClick={handleBackdropClick}>
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-4xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-4xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-orange-50 to-red-50 p-3 sm:p-6 border-b border-gray-200">
           <button
@@ -469,7 +469,7 @@ export const MissingSectionsModal: React.FC<MissingSectionsModalProps> = ({
         </div>
 
         {/* Progress Bar */}
-        <div className="px-3 sm:px-6 pt-3 sm:pt-6">
+        <div className="px-3 sm:px-6 pt-3 sm:pt-6 flex-shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0 mb-4 sm:mb-8">
             {missingSections.map((section, index) => (
               <div key={section} className="flex items-center w-full sm:w-auto">
@@ -498,14 +498,14 @@ export const MissingSectionsModal: React.FC<MissingSectionsModalProps> = ({
         </div>
 
         {/* Content */}
-        <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(98vh-250px)] sm:max-h-[calc(95vh-300px)]">
+        <div className="p-3 sm:p-6 overflow-y-auto flex-1 min-h-0">
           {currentSection === 'workExperience' && renderWorkExperienceForm()}
           {currentSection === 'projects' && renderProjectsForm()}
           {currentSection === 'certifications' && renderCertificationsForm()}
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 p-3 sm:p-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0">
+        <div className="bg-gray-50 p-3 sm:p-6 border-t border-gray-200 flex flex-col sm:flex-row justify-between items-center space-y-3 sm:space-y-0 flex-shrink-0">
           <button
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
             disabled={currentStep === 0}

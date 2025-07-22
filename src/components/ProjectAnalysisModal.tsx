@@ -320,7 +320,7 @@ export const ProjectAnalysisModal: React.FC<ProjectAnalysisModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-2 sm:p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-6xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden">
+      <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl w-full max-w-[95vw] sm:max-w-6xl max-h-[98vh] sm:max-h-[95vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="relative bg-gradient-to-r from-blue-50 to-purple-50 p-3 sm:p-6 border-b border-gray-200">
           <button
@@ -368,7 +368,7 @@ export const ProjectAnalysisModal: React.FC<ProjectAnalysisModalProps> = ({
         </div>
 
         {/* Progress Steps */}
-        <div className="px-3 sm:px-6 pt-3 sm:pt-6">
+        <div className="px-3 sm:px-6 pt-3 sm:pt-6 flex-shrink-0">
           <div className="flex flex-col sm:flex-row items-center justify-between mb-4 sm:mb-8 space-y-4 sm:space-y-0">
             <div className="flex items-center">
               <div className="w-full sm:w-auto flex items-center">
@@ -422,7 +422,7 @@ export const ProjectAnalysisModal: React.FC<ProjectAnalysisModalProps> = ({
           </div>
         </div>
 
-        <div className="p-3 sm:p-6 overflow-y-auto max-h-[calc(98vh-200px)] sm:max-h-[calc(95vh-250px)]">
+        <div className="p-3 sm:p-6 overflow-y-auto flex-1 min-h-0">
           {loading ? (
             <div className="text-center py-8 sm:py-12">
               <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 animate-spin text-blue-600 mx-auto mb-4" />
