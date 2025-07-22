@@ -265,6 +265,15 @@ export const ResumePreview: React.FC<ResumePreviewProps> = ({ resumeData, userTy
                     }}>
                       {edu.school}
                     </div>
+                    {edu.cgpa && (
+                      <div style={{ 
+                        fontSize: '10pt',
+                        fontFamily: 'Calibri, "Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+                        color: '#4B5563'
+                      }}>
+                        CGPA: {edu.cgpa}
+                      </div>
+                    )}
                   </div>
                   <div className="font-bold" style={{ 
                     fontSize: '11pt', 

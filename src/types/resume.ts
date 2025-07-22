@@ -2,6 +2,7 @@ interface Education {
   degree: string;
   school: string;
   year: string;
+  cgpa?: string;
 }
 
 interface WorkExperience {

@@ -249,10 +249,11 @@ function drawContactInfo(state: PageState, resumeData: ResumeData): number {
 }
 
 // Draw work experience section
-function drawWorkExperience(state: PageState, workExperience: any[]): number {
+function drawWorkExperience(state: PageState, workExperience: any[], userType: UserType = 'experienced'): number {
   if (!workExperience || workExperience.length === 0) return 0;
 
-  let totalHeight = drawSectionTitle(state, 'EXPERIENCE');
+  const sectionTitle = userType === 'fresher' ? 'INTERNSHIPS & WORK EXPERIENCE' : 'EXPERIENCE';
+  let totalHeight = drawSectionTitle(state, sectionTitle);
 
   workExperience.forEach((job, index) => {
     // Check if we need space for at least the job header and one bullet
@@ -337,16 +338,26 @@ function drawEducation(state: PageState, education: any[]): number {
       color: PDF_CONFIG.colors.primary
     });
 
+    // Add CGPA if present
+    let cgpaHeight = 0;
+    if (edu.cgpa) {
+      cgpaHeight = drawText(state, `CGPA: ${edu.cgpa}`, PDF_CONFIG.margins.left, {
+        fontSize: PDF_CONFIG.fonts.body.size,
+        fontWeight: PDF_CONFIG.fonts.body.weight,
+        color: PDF_CONFIG.colors.secondary
+      });
+    }
+
     state.doc.setFont('Calibri', 'normal');
     state.doc.setFontSize(PDF_CONFIG.fonts.year.size);
     state.doc.setTextColor(PDF_CONFIG.colors.primary[0], PDF_CONFIG.colors.primary[1], PDF_CONFIG.colors.primary[2]);
 
     const yearWidth = state.doc.getTextWidth(edu.year);
     const yearX = PDF_CONFIG.margins.left + PDF_CONFIG.contentWidth - yearWidth;
-    const yearY = state.currentY - degreeHeight - schoolHeight + (PDF_CONFIG.fonts.jobTitle.size * 0.352778);
+    const yearY = state.currentY - degreeHeight - schoolHeight - cgpaHeight + (PDF_CONFIG.fonts.jobTitle.size * 0.352778);
     state.doc.text(edu.year, yearX, yearY);
 
-    totalHeight += degreeHeight + schoolHeight;
+    totalHeight += degreeHeight + schoolHeight + cgpaHeight;
 
     if (index < education.length - 1) {
       state.currentY += 3;
@@ -542,7 +553,7 @@ function drawCertifications(state: PageState, certifications: any[]): number {
 
 
 // Main export function with mobile optimization
-export const exportToPDF = async (resumeData: ResumeData): Promise<void> => {
+export const exportToPDF = async (resumeData: ResumeData, userType: UserType = 'experienced'): Promise<void> => {
   // Format filename with role if available
   const getFileName = () => {
     const namePart = resumeData.name.replace(/\s+/g, '_');
@@ -605,7 +616,7 @@ export const exportToPDF = async (resumeData: ResumeData): Promise<void> => {
     state.currentY += 3;
 
     // Draw sections in order
-    drawWorkExperience(state, resumeData.workExperience);
+    drawWorkExperience(state, resumeData.workExperience, userType);
     drawEducation(state, resumeData.education);
     drawProjects(state, resumeData.projects);
     drawSkills(state, resumeData.skills);
@@ -662,7 +673,7 @@ export const exportToPDF = async (resumeData: ResumeData): Promise<void> => {
 };
 
 // Generate Word document with mobile optimization
-export const exportToWord = (resumeData: ResumeData): void => {
+export const exportToWord = (resumeData: ResumeData, userType: UserType = 'experienced'): void => {
   // Format filename with role if available
   const getFileName = () => {
     const namePart = resumeData.name.replace(/\s+/g, '_');
@@ -671,7 +682,7 @@ export const exportToWord = (resumeData: ResumeData): void => {
   };
 
   try {
-    const htmlContent = generateWordHTMLContent(resumeData);
+    const htmlContent = generateWordHTMLContent(resumeData, userType);
     const blob = new Blob([htmlContent], { 
       type: 'application/vnd.ms-word'
     });
@@ -687,7 +698,7 @@ export const exportToWord = (resumeData: ResumeData): void => {
   }
 };
 
-const generateWordHTMLContent = (data: ResumeData): string => {
+const generateWordHTMLContent = (data: ResumeData, userType: UserType = 'experienced'): string => {
   // Build contact info with bold labels and proper hyperlinks
   const contactParts = [];
   
@@ -861,7 +872,7 @@ const generateWordHTMLContent = (data: ResumeData): string => {
       </div>
       
       ${data.workExperience && data.workExperience.length > 0 ? `
-        <div class="section-title">EXPERIENCE</div>
+        <div class="section-title">${userType === 'fresher' ? 'INTERNSHIPS & WORK EXPERIENCE' : 'EXPERIENCE'}</div>
         <div class="section-underline"></div>
         ${data.workExperience.map(job => `
           <div class="job-header">
@@ -887,6 +898,7 @@ const generateWordHTMLContent = (data: ResumeData): string => {
             <div>
               <div class="degree">${edu.degree}</div>
               <div class="school">${edu.school}</div>
+              ${edu.cgpa ? `<div style="font-size: 10pt; color: #4B5563; font-family: Calibri, 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">CGPA: ${edu.cgpa}</div>` : ''}
             </div>
             <div class="year">${edu.year}</div>
           </div>

@@ -5,10 +5,11 @@ import { exportToPDF, exportToWord } from '../utils/exportUtils';
 
 interface ExportButtonsProps {
   resumeData: ResumeData;
+  userType?: UserType;
   targetRole?: string;
 }
 
-export const ExportButtons: React.FC<ExportButtonsProps> = ({ resumeData, targetRole }) => {
+export const ExportButtons: React.FC<ExportButtonsProps> = ({ resumeData, userType = 'experienced', targetRole }) => {
   const [isExportingPDF, setIsExportingPDF] = useState(false);
   const [isExportingWord, setIsExportingWord] = useState(false);
   const [showShareOptions, setShowShareOptions] = useState(false);
@@ -25,7 +26,7 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ resumeData, target
     setExportStatus({ type: null, status: null, message: '' });
     
     try {
-      await exportToPDF(resumeData);
+      await exportToPDF(resumeData, userType);
       setExportStatus({
         type: 'pdf',
         status: 'success',
@@ -60,7 +61,7 @@ export const ExportButtons: React.FC<ExportButtonsProps> = ({ resumeData, target
     setExportStatus({ type: null, status: null, message: '' });
     
     try {
-      exportToWord(resumeData);
+      exportToWord(resumeData, userType);
       setExportStatus({
         type: 'word',
         status: 'success',

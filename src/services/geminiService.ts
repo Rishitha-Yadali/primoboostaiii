@@ -38,14 +38,16 @@ FRESHER REQUIREMENTS:
 3. Include additional sections that showcase potential: Achievements, Extra-curricular Activities, Languages
 4. Focus on academic projects, internships, and transferable skills
 5. Highlight learning ability, enthusiasm, and relevant coursework
+6. ALL INTERNSHIPS, TRAININGS, and WORK EXPERIENCE should be categorized under "workExperience" section
+7. Extract CGPA from education if mentioned (e.g., "CGPA: 8.4/10" or "GPA: 3.8/4.0")
 
 SECTION ORDER FOR FRESHERS:
 1. Contact Information
 2. Professional Summary (OPTIONAL - only if relevant experience exists)
 3. Technical Skills
 4. Education (PROMINENT)
-5. Academic Projects (IMPORTANT)
-6. Internships/Work Experience (if any)
+5. Internships & Work Experience (IMPORTANT - includes all internships, trainings, and work)
+6. Academic Projects (IMPORTANT)
 7. Achievements (if present in original resume)
 8. Extra-curricular Activities (if present in original resume)
 9. Certifications
@@ -97,7 +99,9 @@ ${userType === 'experienced' ? `
 ` : `
 - Professional Summary: OPTIONAL - only include if candidate has relevant internships/experience
 - Education: PROMINENT - include degree, institution, year, relevant coursework if applicable
+- Education: INCLUDE CGPA if mentioned in original resume (e.g., "CGPA: 8.4/10")
 - Academic Projects: IMPORTANT - treat as main experience section
+- Work Experience: COMBINE all internships, trainings, and work experience under this single section
 - Achievements: Include if present in original resume (academic awards, competitions, etc.)
 - Extra-curricular Activities: Include if present (leadership roles, clubs, volunteer work)
 - Languages Known: Include if present (list languages with proficiency levels if available)
@@ -126,7 +130,7 @@ JSON Structure:
   "github": "",
   ${userType === 'experienced' ? '"summary": "",' : '"summary": "",'}
   "education": [
-    {"degree": "", "school": "", "year": ""}
+    {"degree": "", "school": "", "year": "", "cgpa": ""}
   ],
   "workExperience": [
     {"role": "", "company": "", "year": "", "bullets": []}
