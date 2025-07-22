@@ -9,6 +9,7 @@ import { ResumePreview } from './ResumePreview';
 import { ComprehensiveAnalysis } from './ComprehensiveAnalysis';
 import { MobileOptimizedInterface } from './MobileOptimizedInterface';
 import { MissingSectionsModal } from './MissingSectionsModal';
+import { ProjectAnalysisModal } from './ProjectAnalysisModal';
 import { SubscriptionPlans } from './payment/SubscriptionPlans';
 import { SubscriptionStatus } from './payment/SubscriptionStatus';
 import { ResumeFlowCarousel } from './ResumeFlowCarousel';
@@ -34,6 +35,7 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
   // UI states
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optimizationError, setOptimizationError] = useState<string | null>(null);
+  const [showProjectAnalysis, setShowProjectAnalysis] = useState(false);
   const [showMissingSections, setShowMissingSections] = useState(false);
   const [missingSections, setMissingSections] = useState<string[]>([]);
   const [showSubscriptionPlans, setShowSubscriptionPlans] = useState(false);
@@ -63,6 +65,42 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     }
   };
 
+  const processPostOptimizationSteps = async (resumeData: ResumeData) => {
+    try {
+      // Check for missing critical sections
+      const missing = checkMissingSections(resumeData, currentUserType);
+      console.log('Missing sections detected by checkMissingSections:', missing);
+      
+      if (missing.length > 0) {
+        setMissingSections(missing);
+        setOptimizedResume(resumeData);
+        setShowMissingSections(true);
+        console.log('Missing sections found, setting state to show modal.');
+        return;
+      }
+
+      // Generate after score
+      const afterScoreData = generateAfterScore(JSON.stringify(resumeData));
+      setAfterScore(afterScoreData);
+
+      // Determine changed sections
+      const changed = getChangedSections(resumeData, currentUserType);
+      setChangedSections(changed);
+
+      setOptimizedResume(resumeData);
+      console.log('No missing sections, setting optimized resume and proceeding to analysis view.');
+
+      // Use optimization from subscription
+      if (user) {
+        await paymentService.useOptimization(user.id);
+        await checkSubscriptionStatus(); // Refresh subscription status
+      }
+    } catch (error) {
+      console.error('Error in post-optimization steps:', error);
+      setOptimizationError(error instanceof Error ? error.message : 'Post-optimization processing failed.');
+    }
+  };
+
   const handleOptimizeResume = async (data: {
     resumeText: string;
     jobDescription: string;
@@ -78,7 +116,7 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     }
 
     if (!isAuthenticated) {
-      setOptimizationError('Please sign in to optimize your resume');
+      onShowAuthModal();
       return;
     }
 
@@ -101,6 +139,7 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
       setCurrentTargetRole(data.targetRole);
 
       // Optimize resume
+      console.log('Calling optimizeResume with data:', data);
       const optimized = await optimizeResume(
         data.resumeText,
         data.jobDescription,
@@ -109,36 +148,17 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
         data.githubUrl,
         data.targetRole
       );
+      console.log('Optimized resume received from API:', optimized);
 
       // Add additional fields
       optimized.targetRole = data.targetRole;
       optimized.linkedin = data.linkedinUrl;
       optimized.github = data.githubUrl;
 
-      // Check for missing critical sections
-      const missing = checkMissingSections(optimized, data.userType);
-      if (missing.length > 0) {
-        setMissingSections(missing);
-        setOptimizedResume(optimized);
-        setShowMissingSections(true);
-        return;
-      }
-
-      // Generate after score
-      const afterScoreData = generateAfterScore(JSON.stringify(optimized));
-      setAfterScore(afterScoreData);
-
-      // Determine changed sections
-      const changed = getChangedSections(optimized, data.userType);
-      setChangedSections(changed);
-
+      // Store the optimized resume and trigger project analysis
       setOptimizedResume(optimized);
-
-      // Use optimization from subscription
-      if (user) {
-        await paymentService.useOptimization(user.id);
-        await checkSubscriptionStatus(); // Refresh subscription status
-      }
+      setShowProjectAnalysis(true);
+      console.log('Initial optimization complete, triggering project analysis modal.');
 
     } catch (error) {
       console.error('Optimization error:', error);
@@ -146,6 +166,13 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     } finally {
       setIsOptimizing(false);
     }
+  };
+
+  const handleProjectsAnalyzed = (updatedResume: ResumeData) => {
+    console.log('Projects analyzed, received updated resume:', updatedResume);
+    setShowProjectAnalysis(false);
+    // Continue with the post-optimization flow using the updated resume
+    processPostOptimizationSteps(updatedResume);
   };
 
   const checkMissingSections = (resumeData: ResumeData, userType: UserType): string[] => {
@@ -216,16 +243,11 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
       ]
     };
 
-    setOptimizedResume(updatedResume);
     setShowMissingSections(false);
-
-    // Generate after score with complete data
-    const afterScoreData = generateAfterScore(JSON.stringify(updatedResume));
-    setAfterScore(afterScoreData);
-
-    // Update changed sections
-    const changed = getChangedSections(updatedResume, currentUserType);
-    setChangedSections(changed);
+    console.log('Missing sections provided, continuing with updated resume:', updatedResume);
+    
+    // Continue with the post-optimization flow using the updated resume
+    await processPostOptimizationSteps(updatedResume);
   };
 
   const handleSubscriptionSuccess = () => {
@@ -267,6 +289,8 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
     });
   }
 
+  console.log('Current sections array for MobileOptimizedInterface:', sections);
+
   // If we have sections to show, render MobileOptimizedInterface
   if (sections.length > 0) {
     return <MobileOptimizedInterface sections={sections} />;
@@ -295,6 +319,15 @@ export default function ResumeOptimizer({ onShowAuthModal }: ResumeOptimizerProp
       />
 
       {/* Modals */}
+      <ProjectAnalysisModal
+        isOpen={showProjectAnalysis}
+        onClose={() => setShowProjectAnalysis(false)}
+        resumeData={optimizedResume || {} as ResumeData}
+        jobDescription={currentJobDescription}
+        targetRole={currentTargetRole}
+        onProjectsUpdated={handleProjectsAnalyzed}
+      />
+
       <MissingSectionsModal
         isOpen={showMissingSections}
         onClose={() => setShowMissingSections(false)}
