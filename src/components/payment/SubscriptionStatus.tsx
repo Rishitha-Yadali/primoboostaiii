@@ -12,7 +12,6 @@ export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({ onUpgrad
   const { user } = useAuth();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showMore, setShowMore] = useState(false);
 
   useEffect(() => {
     loadSubscription();
@@ -114,16 +113,16 @@ export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({ onUpgrad
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-      {/* Compact Header */}
-      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 sm:p-6 border-b border-gray-200">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="bg-green-100 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center">
-              <Crown className="w-5 h-5 sm:w-6 sm:h-6 text-green-600" />
+      {/* Header */}
+      <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mr-4">
+              <Crown className="w-6 h-6 text-green-600" />
             </div>
             <div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900">Active Plan</h3>
-              <p className="text-sm text-gray-600">
+              <h3 className="text-xl font-semibold text-gray-900">Active Subscription</h3>
+              <p className="text-gray-600">
                 {paymentService.getPlanById(subscription.planId)?.name}
               </p>
             </div>
@@ -135,146 +134,167 @@ export const SubscriptionStatus: React.FC<SubscriptionStatusProps> = ({ onUpgrad
             </span>
           </div>
         </div>
-        
-        {/* Mobile Compact Stats */}
-        <div className="grid grid-cols-2 sm:hidden gap-3">
-          <div className="bg-white rounded-lg p-3 text-center shadow-sm">
-            <div className="text-xl font-bold text-blue-600">{remaining}</div>
-            <div className="text-xs text-gray-600">Left</div>
-          </div>
-          <div className="bg-white rounded-lg p-3 text-center shadow-sm">
-            <div className="text-xl font-bold text-purple-600">{daysLeft}</div>
-            <div className="text-xs text-gray-600">Days</div>
+
+        {/* Mobile Detailed View */}
+        <div className="sm:hidden p-4">
+          <div className="space-y-4">
+            {/* Progress Bar */}
+            <div>
+              <div className="flex justify-between text-sm text-gray-600 mb-2">
+                <span>Usage Progress</span>
+                <span>{subscription.optimizationsUsed} / {subscription.optimizationsTotal}</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className={`h-3 rounded-full transition-all duration-300 ${
+                    usagePercentage > 90 ? 'bg-red-500' :
+                    usagePercentage > 70 ? 'bg-orange-500' :
+                    'bg-green-500'
+                  }`}
+                  style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+                ></div>
+              </div>
+            </div>
+            
+            {/* Subscription Details */}
+            <div className="bg-gray-50 rounded-xl p-3">
+              <div className="grid grid-cols-1 gap-2 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Start Date:</span>
+                  <span className="font-medium">{formatDate(subscription.startDate)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">End Date:</span>
+                  <span className="font-medium">{formatDate(subscription.endDate)}</span>
+                </div>
+                {subscription.couponUsed && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Coupon:</span>
+                    <span className="font-medium text-green-600">{subscription.couponUsed}</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-        
-        {/* View More Button - Mobile Only */}
-        <button
-          onClick={() => setShowMore(!showMore)}
-          className="sm:hidden w-full mt-3 py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors flex items-center justify-center space-x-2 text-sm"
-        >
-          <span>{showMore ? 'View Less' : 'View More'}</span>
-          <ChevronDown className={`w-4 h-4 transition-transform ${showMore ? 'rotate-180' : ''}`} />
-        </button>
       </div>
 
-      {/* Detailed Content */}
-      <div className={`${showMore ? 'block' : 'hidden'} sm:block`}>
-        {/* Desktop Stats - Always visible */}
-        <div className="hidden sm:block p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            {/* Optimizations Used */}
-            <div className="text-center">
-              <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Zap className="w-6 h-6 text-blue-600" />
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{remaining}</div>
-              <div className="text-sm text-gray-600">Optimizations Left</div>
+      {/* Usage Stats */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {/* Optimizations Used */}
+          <div className="text-center">
+            <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Zap className="w-6 h-6 text-blue-600" />
             </div>
-
-            {/* Days Remaining */}
-            <div className="text-center">
-              <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                <Calendar className="w-6 h-6 text-purple-600" />
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{daysLeft}</div>
-              <div className="text-sm text-gray-600">Days Remaining</div>
-            </div>
-
-            {/* Usage Percentage */}
-            <div className="text-center">
-              <div className="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-                <RefreshCw className="w-6 h-6 text-orange-600" />
-              </div>
-              <div className="text-2xl font-bold text-gray-900">{Math.round(usagePercentage)}%</div>
-              <div className="text-sm text-gray-600">Used</div>
-            </div>
+            <div className="text-2xl font-bold text-gray-900">{remaining}</div>
+            <div className="text-sm text-gray-600">Optimizations Left</div>
           </div>
 
-          {/* Progress Bar */}
-          <div className="mb-6">
-            <div className="flex justify-between text-sm text-gray-600 mb-2">
-              <span>Usage Progress</span>
-              <span>{subscription.optimizationsUsed} / {subscription.optimizationsTotal}</span>
+          {/* Days Remaining */}
+          <div className="text-center">
+            <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+              <Calendar className="w-6 h-6 text-purple-600" />
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div
-                className={`h-3 rounded-full transition-all duration-300 ${
-                  usagePercentage > 90 ? 'bg-red-500' :
-                  usagePercentage > 70 ? 'bg-orange-500' :
-                  'bg-green-500'
-                }`}
-                style={{ width: `${Math.min(usagePercentage, 100)}%` }}
-              ></div>
-            </div>
+            <div className="text-2xl font-bold text-gray-900">{daysLeft}</div>
+            <div className="text-sm text-gray-600">Days Remaining</div>
           </div>
 
-          {/* Subscription Details */}
-          <div className="bg-gray-50 rounded-xl p-4 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-600">Start Date:</span>
-                <span className="ml-2 font-medium">{formatDate(subscription.startDate)}</span>
-              </div>
-              <div>
-                <span className="text-gray-600">End Date:</span>
-                <span className="ml-2 font-medium">{formatDate(subscription.endDate)}</span>
-              </div>
-              {subscription.couponUsed && (
-                <div className="md:col-span-2">
-                  <span className="text-gray-600">Coupon Used:</span>
-                  <span className="ml-2 font-medium text-green-600">{subscription.couponUsed}</span>
-                </div>
-              )}
+          {/* Usage Percentage */}
+          <div className="text-center">
+            <div className="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+              <RefreshCw className="w-6 h-6 text-orange-600" />
             </div>
+            <div className="text-2xl font-bold text-gray-900">{Math.round(usagePercentage)}%</div>
+            <div className="text-sm text-gray-600">Used</div>
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            {remaining === 0 && (
-              <button
-                onClick={onUpgrade}
-                className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                Renew Subscription
-              </button>
-            )}
-            
-            {remaining > 0 && remaining < 5 && (
-              <button
-                onClick={onUpgrade}
-                className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                Upgrade Plan
-              </button>
-            )}
+        {/* Progress Bar */}
+        <div className="mb-6">
+          <div className="flex justify-between text-sm text-gray-600 mb-2">
+            <span>Usage Progress</span>
+            <span>{subscription.optimizationsUsed} / {subscription.optimizationsTotal}</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div
+              className={`h-3 rounded-full transition-all duration-300 ${
+                usagePercentage > 90 ? 'bg-red-500' :
+                usagePercentage > 70 ? 'bg-orange-500' :
+                'bg-green-500'
+              }`}
+              style={{ width: `${Math.min(usagePercentage, 100)}%` }}
+            ></div>
+          </div>
+        </div>
 
-            {remaining >= 5 && (
-              <button
-                onClick={onUpgrade}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-              >
-                Upgrade Plan
-              </button>
+        {/* Subscription Details */}
+        <div className="bg-gray-50 rounded-xl p-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-gray-600">Start Date:</span>
+              <span className="ml-2 font-medium">{formatDate(subscription.startDate)}</span>
+            </div>
+            <div>
+              <span className="text-gray-600">End Date:</span>
+              <span className="ml-2 font-medium">{formatDate(subscription.endDate)}</span>
+            </div>
+            {subscription.couponUsed && (
+              <div className="md:col-span-2">
+                <span className="text-gray-600">Coupon Used:</span>
+                <span className="ml-2 font-medium text-green-600">{subscription.couponUsed}</span>
+              </div>
             )}
           </div>
+        </div>
+      </div>
 
-          {/* Low Usage Warning */}
-          {remaining <= 2 && remaining > 0 && (
-            <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-xl">
-              <div className="flex items-start">
-                <AlertCircle className="w-5 h-5 text-orange-600 mr-3 mt-0.5" />
-                <div>
-                  <div className="font-medium text-orange-800">Running Low on Optimizations</div>
-                  <div className="text-orange-700 text-sm mt-1">
-                    You have only {remaining} optimization{remaining !== 1 ? 's' : ''} left. Consider upgrading your plan to continue optimizing your resume.
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* Action Buttons */}
+      <div className="p-4 sm:p-6 border-t border-gray-200">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {remaining === 0 && (
+            <button
+              onClick={onUpgrade}
+              className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Renew Subscription
+            </button>
+          )}
+          
+          {remaining > 0 && remaining < 5 && (
+            <button
+              onClick={onUpgrade}
+              className="flex-1 bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Upgrade Plan
+            </button>
+          )}
+
+          {remaining >= 5 && (
+            <button
+              onClick={onUpgrade}
+              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              Upgrade Plan
+            </button>
           )}
         </div>
       </div>
+
+      {/* Low Usage Warning */}
+      {remaining <= 2 && remaining > 0 && (
+        <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-xl">
+          <div className="flex items-start">
+            <AlertCircle className="w-5 h-5 text-orange-600 mr-3 mt-0.5" />
+            <div>
+              <div className="font-medium text-orange-800">Running Low on Optimizations</div>
+              <div className="text-orange-700 text-sm mt-1">
+                You have only {remaining} optimization{remaining !== 1 ? 's' : ''} left. Consider upgrading your plan to continue optimizing your resume.
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
